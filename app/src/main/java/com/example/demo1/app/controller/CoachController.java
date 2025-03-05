@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-public class AppController {
+public class CoachController {
 
     @Autowired
     private CoachService service;

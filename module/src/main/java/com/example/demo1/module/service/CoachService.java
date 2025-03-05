@@ -1,5 +1,6 @@
 package com.example.demo1.module.service;
 
+import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,11 @@ public class CoachService {
         return mapper.getCoachInfo(id);
     }
 
-    public Boolean addCoach(String pics, String name, String speciality, String intro) {
+    public Boolean addCoach(AddOrUpdateCoachDTO dto) {
+        String pics = dto.getPics();
+        String name = dto.getName();
+        String speciality = dto.getSpeciality();
+        String intro = dto.getIntro();
         long timestamp = System.currentTimeMillis() / 1000;
         return mapper.addCoach(pics, name, speciality, intro, (int)timestamp);
     }
@@ -36,7 +41,12 @@ public class CoachService {
         return false;
     }
 
-    public Boolean updateCoach(BigInteger id, String pics, String name, String speciality, String intro) {
+    public Boolean updateCoach(AddOrUpdateCoachDTO dto) {
+        BigInteger id = dto.getId();
+        String pics = dto.getPics();
+        String name = dto.getName();
+        String speciality = dto.getSpeciality();
+        String intro = dto.getIntro();
         Coach coachInfo = getCoachInfo(id);
         if (!ObjectUtils.isEmpty(coachInfo)) {
             long timestamp = System.currentTimeMillis() / 1000;
