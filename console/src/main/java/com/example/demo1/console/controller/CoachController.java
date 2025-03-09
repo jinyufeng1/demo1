@@ -17,18 +17,18 @@ public class CoachController {
 
     //新增教练信息
     @RequestMapping("/coach/add")
-    public Boolean addCoach(@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
+    public Integer addCoach(@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
         return service.addCoach(new AddOrUpdateCoachDTO(null, pics, name, speciality, intro));
     }
 
     //删除教练信息
     @RequestMapping("/coach/del")
-    public Boolean delCoach(@RequestParam("id") BigInteger id) {
+    public Integer delCoach(@RequestParam("id") BigInteger id) {
         return service.delCoach(id);
     }
 
     @RequestMapping("/coach/update")
-    public Boolean updateCoach(@RequestParam("id")BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
+    public Integer updateCoach(@RequestParam(name = "id", required = false) BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
         return service.updateCoach(new AddOrUpdateCoachDTO(id, pics, name, speciality, intro));
     }
 }

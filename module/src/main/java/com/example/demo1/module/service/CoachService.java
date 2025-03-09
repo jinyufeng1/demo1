@@ -3,6 +3,7 @@ package com.example.demo1.module.service;
 import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -23,35 +24,34 @@ public class CoachService {
         return mapper.getCoachInfo(id);
     }
 
-    public Boolean addCoach(AddOrUpdateCoachDTO dto) {
-        String pics = dto.getPics();
-        String name = dto.getName();
-        String speciality = dto.getSpeciality();
-        String intro = dto.getIntro();
+    public Integer addCoach(AddOrUpdateCoachDTO dto) {
+        Coach coach = new Coach();
+        BeanUtils.copyProperties(dto, coach);
         long timestamp = System.currentTimeMillis() / 1000;
-        return mapper.addCoach(pics, name, speciality, intro, (int)timestamp);
+        coach.setCreateTime((int)timestamp);
+        coach.setUpdateTime((int)timestamp);
+        return mapper.addCoach(coach);
     }
 
-    public Boolean delCoach(BigInteger id) {
+    public Integer delCoach(BigInteger id) {
         Coach coachInfo = getCoachInfo(id);
         if (!ObjectUtils.isEmpty(coachInfo)) {
             long timestamp = System.currentTimeMillis() / 1000;
             return mapper.delCoach(id, (int)timestamp);
         }
-        return false;
+        return 0;
     }
 
-    public Boolean updateCoach(AddOrUpdateCoachDTO dto) {
+    public Integer updateCoach(AddOrUpdateCoachDTO dto) {
         BigInteger id = dto.getId();
-        String pics = dto.getPics();
-        String name = dto.getName();
-        String speciality = dto.getSpeciality();
-        String intro = dto.getIntro();
         Coach coachInfo = getCoachInfo(id);
         if (!ObjectUtils.isEmpty(coachInfo)) {
+            Coach coach = new Coach();
+            BeanUtils.copyProperties(dto, coach);
             long timestamp = System.currentTimeMillis() / 1000;
-            return mapper.updateCoach(id, pics, name, speciality, intro, (int)timestamp);
+            coach.setUpdateTime((int)timestamp);
+            return mapper.updateCoach(coach);
         }
-        return false;
+        return 0;
     }
 }

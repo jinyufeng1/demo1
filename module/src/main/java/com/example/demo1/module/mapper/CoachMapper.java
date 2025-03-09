@@ -16,18 +16,23 @@ public interface CoachMapper {
     @Select("select * from coach WHERE is_deleted = 0 and id = #{id}")
     Coach getCoachInfo(@Param("id") BigInteger id);
 
-    @Insert("insert into coach  (`name`,`pics`,`speciality`,`intro`,`create_time`,`update_time`) VALUES(#{name},#{pics},#{speciality},#{intro},#{timestamp},#{timestamp})")
-    Boolean addCoach(@Param("pics") String pics, @Param("name") String name,
-                     @Param("speciality") String speciality, @Param("intro") String intro,
-                     @Param("timestamp") Integer timestamp);
+//    @Insert(
+//            "insert into coach  " +
+//            "(`name`,`pics`,`speciality`,`intro`,`create_time`,`update_time`) " +
+//            "VALUES(#{coach.name},#{coach.pics},#{coach.speciality},#{coach.intro},#{coach.createTime},#{coach.updateTime})"
+//    )
+//    todo 尝试@SelectProvider
+    Integer addCoach(@Param("coach") Coach coach);
 
 
     @Update("update coach set is_deleted=1, update_time=#{timestamp} where id=#{id} limit 1")
-    Boolean delCoach(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
+    Integer delCoach(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
 
-    @Update("update coach set pics=#{pics}, name=#{name}, speciality=#{speciality}, intro=#{intro}, update_time=#{timestamp} where id=#{id} limit 1")
-    Boolean updateCoach(@Param("id") BigInteger id,
-                        @Param("pics") String pics, @Param("name") String name,
-                        @Param("speciality") String speciality, @Param("intro") String intro,
-                        @Param("timestamp") Integer timestamp);
+//    @Update(
+//            "update coach " +
+//            "set pics=#{coach.pics}, `name`=#{coach.name}, speciality=#{coach.speciality}, intro=#{coach.intro}, update_time=#{coach.updateTime} " +
+//            "where id=#{id} limit 1"
+//    )
+//    todo 尝试@UpdateProvider
+Integer updateCoach(@Param("coach") Coach coach);
 }
