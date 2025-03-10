@@ -26,14 +26,8 @@ public class CoachController {
 
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList() {
-        CoachItemListVo coachItemListVo = new CoachItemListVo();
-
-        List<Coach> coachList = service.getCoachList();
-        if (coachList.isEmpty()) {
-            return coachItemListVo;
-        }
-
-        List<CoachItemVo> list = coachList.stream()
+        //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
+        List<CoachItemVo> list = service.getCoachList().stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -47,7 +41,7 @@ public class CoachController {
                     return coachItemVo;
                 }).collect(Collectors.toList());
 
-
+        CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setList(list);
         return coachItemListVo;
     }

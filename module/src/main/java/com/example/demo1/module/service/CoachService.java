@@ -34,24 +34,25 @@ public class CoachService {
     }
 
     public Boolean delCoach(BigInteger id) {
-        Coach coachInfo = getCoachInfo(id);
-        if (!ObjectUtils.isEmpty(coachInfo)) {
-            long timestamp = System.currentTimeMillis() / 1000;
-            return 0 != mapper.delCoach(id, (int)timestamp);
+        if (ObjectUtils.isEmpty(getCoachInfo(id))) {
+            return false;
         }
-        return false;
+
+        long timestamp = System.currentTimeMillis() / 1000;
+        return 0 != mapper.delCoach(id, (int)timestamp);
+
     }
 
     public Boolean updateCoach(AddOrUpdateCoachDTO dto) {
         BigInteger id = dto.getId();
-        Coach coachInfo = getCoachInfo(id);
-        if (!ObjectUtils.isEmpty(coachInfo)) {
-            Coach coach = new Coach();
-            BeanUtils.copyProperties(dto, coach);
-            long timestamp = System.currentTimeMillis() / 1000;
-            coach.setUpdateTime((int)timestamp);
-            return 0 != mapper.updateCoach(coach);
+        if (ObjectUtils.isEmpty(getCoachInfo(id))) {
+            return false;
         }
-        return false;
+
+        Coach coach = new Coach();
+        BeanUtils.copyProperties(dto, coach);
+        long timestamp = System.currentTimeMillis() / 1000;
+        coach.setUpdateTime((int)timestamp);
+        return 0 != mapper.updateCoach(coach);
     }
 }

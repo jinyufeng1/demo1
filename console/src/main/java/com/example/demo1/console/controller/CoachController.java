@@ -19,11 +19,8 @@ public class CoachController {
     //新增教练信息
     @RequestMapping("/coach/add")
     public Boolean addCoach(@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
-        // trim to name;
-        if (StringUtils.hasLength(name)) {
-            name = name.trim();
-        }
-        return service.addCoach(new AddOrUpdateCoachDTO(null, pics, name, speciality, intro));
+        // trim to name; Due to required=false in springmvc,name can't be null at all!!!
+        return service.addCoach(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
     }
 
     //删除教练信息
@@ -33,11 +30,8 @@ public class CoachController {
     }
 
     @RequestMapping("/coach/update")
-    public Boolean updateCoach(@RequestParam(name = "id", required = false) BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
+    public Boolean updateCoach(@RequestParam(name = "id") BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
         // trim to name;
-        if (StringUtils.hasLength(name)) {
-            name = name.trim();
-        }
-        return service.updateCoach(new AddOrUpdateCoachDTO(id, pics, name, speciality, intro));
+        return service.updateCoach(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
     }
 }

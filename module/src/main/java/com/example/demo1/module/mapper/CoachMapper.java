@@ -13,7 +13,7 @@ public interface CoachMapper {
     List<Coach> getCoachList();
 
 
-    @Select("select * from coach WHERE is_deleted = 0 and id = #{id}")
+    @Select("select * from coach WHERE id = #{id} and is_deleted = 0")
     Coach getCoachInfo(@Param("id") BigInteger id);
 
 //    @Insert(
@@ -34,5 +34,5 @@ public interface CoachMapper {
 //            "where id=#{id} limit 1"
 //    )
 //    todo 尝试@UpdateProvider
-Integer updateCoach(@Param("coach") Coach coach);
+    Integer updateCoach(@Param("coach") Coach coach);
 }
