@@ -16,8 +16,12 @@ public class CoachService {
     @Resource // 由于mybatis和spring的整合机制，可以和@Autowired注入互换
     private CoachMapper mapper;
 
-    public List<Coach> getCoachList() {
-        return mapper.getCoachList();
+    public List<Coach> getCoachList(int index, int pageSize) {
+        return mapper.getCoachList(index, pageSize);
+    }
+
+    public int getCoachTotal() {
+        return mapper.getCoachCount();
     }
 
     public Coach getCoachInfo(BigInteger id) {

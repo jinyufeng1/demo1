@@ -1,4 +1,4 @@
-package com.example.demo1.app.domain;
+package com.example.demo1.console.domain;
 
 import lombok.Data;
 
@@ -7,5 +7,6 @@ import java.util.List;
 @Data
 public class CoachItemListVo {
     private List<CoachItemVo> list;
-    private Boolean isEnd;
+    private Integer pageSize;
+    private Integer total;
 }
