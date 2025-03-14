@@ -27,7 +27,7 @@ public class CoachController {
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page) {
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
-        List<CoachItemVo> list = service.getCoachList(page * Constant.pageSize, Constant.pageSize).stream()
+        List<CoachItemVo> list = service.getCoachList(page, Constant.pageSize).stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();

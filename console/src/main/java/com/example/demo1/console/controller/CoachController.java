@@ -4,6 +4,7 @@ import com.example.demo1.console.domain.CoachDetailsVo;
 import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
+import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CoachService;
@@ -59,7 +60,7 @@ public class CoachController {
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
-        List<CoachItemVo> list = service.getCoachList(page * Constant.pageSize, Constant.pageSize).stream()
+        List<CoachItemVo> list = service.getCoachList(page, Constant.pageSize).stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -95,12 +96,12 @@ public class CoachController {
         }
         Integer createTime = coachInfo.getCreateTime();
         if (!ObjectUtils.isEmpty(createTime)) {
-            coachDetailsVo.setCreateTime(Constant.transformTimestamp(createTime));
+            coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(createTime));
         }
 
         Integer updateTime = coachInfo.getUpdateTime();
         if (!ObjectUtils.isEmpty(updateTime)) {
-            coachDetailsVo.setUpdateTime(Constant.transformTimestamp(updateTime));
+            coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(updateTime));
         }
 
         return coachDetailsVo;

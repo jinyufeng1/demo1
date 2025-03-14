@@ -1,5 +1,6 @@
 package com.example.demo1.module.service;
 
+import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
@@ -16,8 +17,8 @@ public class CoachService {
     @Resource // 由于mybatis和spring的整合机制，可以和@Autowired注入互换
     private CoachMapper mapper;
 
-    public List<Coach> getCoachList(int index, int pageSize) {
-        return mapper.getCoachList(index, pageSize);
+    public List<Coach> getCoachList(int page, int pageSize) {
+        return mapper.getCoachList((page - 1) * Constant.pageSize, pageSize);
     }
 
     public int getCoachTotal() {
