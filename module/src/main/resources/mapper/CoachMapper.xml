@@ -4,7 +4,7 @@
 <!--    经验总结 ：-->
 <!--    动态sql中要设计托底字段稳定sql结构-->
 <!--    不要在sql里面写注释，影响运行sql的可读性-->
-    <insert id="addCoach" parameterType="com.example.demo1.module.entity.Coach">
+    <insert id="insert" parameterType="com.example.demo1.module.entity.Coach">
         insert into coach (
             <if test="coach.pics != null and coach.pics != ''">`pics`,</if>
             <if test="coach.name != null and coach.name != ''">`name`,</if>
@@ -23,7 +23,7 @@
         )
     </insert>
 
-    <update id="updateCoach" parameterType="com.example.demo1.module.entity.Coach">
+    <update id="update" parameterType="com.example.demo1.module.entity.Coach">
         update coach
         set
         <if test="coach.pics != null and coach.pics != ''">`pics` = #{coach.pics},</if>

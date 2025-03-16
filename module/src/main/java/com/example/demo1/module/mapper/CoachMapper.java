@@ -8,15 +8,25 @@ import java.util.List;
 
 @Mapper //代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理
 public interface CoachMapper {
-
-    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
-    List<Coach> getCoachList(int index, int pageSize);
+    @Select("<script>" +
+        "select * from coach WHERE is_deleted = 0 " +
+        "<if test='keyword != null'>" +
+        "   and name like CONCAT('%', #{keyword}, '%')" +
+        "</if>" +
+        "order by id limit #{index}, #{pageSize}" +
+        "</script>")
+//    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
+    List<Coach> getPageList(int index, String keyword, int pageSize);
 
     @Select("select count(*) from coach WHERE is_deleted = 0")
-    int getCoachCount();
+    int countAll();
 
+//    **************************五大基础方法**************************
     @Select("select * from coach WHERE id = #{id} and is_deleted = 0")
-    Coach getCoachInfo(@Param("id") BigInteger id);
+    Coach getById(@Param("id") BigInteger id);
+
+    @Select("select * from coach WHERE id = #{id}")
+    Coach extractById(@Param("id") BigInteger id);
 
 //    @Insert(
 //            "insert into coach  " +
@@ -24,11 +34,11 @@ public interface CoachMapper {
 //            "VALUES(#{coach.name},#{coach.pics},#{coach.speciality},#{coach.intro},#{coach.createTime},#{coach.updateTime})"
 //    )
 //    todo 尝试@SelectProvider
-    int addCoach(@Param("coach") Coach coach);
+    int insert(@Param("coach") Coach coach);
 
 
     @Update("update coach set is_deleted=1, update_time=#{timestamp} where id=#{id} limit 1")
-    int delCoach(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
+    int delete(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
 
 //    @Update(
 //            "update coach " +
@@ -36,5 +46,5 @@ public interface CoachMapper {
 //            "where id=#{id} limit 1"
 //    )
 //    todo 尝试@UpdateProvider
-    int updateCoach(@Param("coach") Coach coach);
+    int update(@Param("coach") Coach coach);
 }

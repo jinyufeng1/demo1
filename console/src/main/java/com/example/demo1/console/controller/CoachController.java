@@ -31,27 +31,27 @@ public class CoachController {
     @RequestMapping("/coach/add")
     public Boolean addCoach(@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
         // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-        return service.addCoach(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
+        return service.insert(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
     }
 
     //删除教练信息
     @RequestMapping("/coach/del")
     public Boolean delCoach(@RequestParam("id") BigInteger id) {
-        return service.delCoach(id);
+        return service.delete(id);
     }
 
     @RequestMapping("/coach/update")
     public Boolean updateCoach(@RequestParam(name = "id") BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
         // trim to name;
-        return service.updateCoach(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
+        return service.update(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
     }
 
     @RequestMapping("/coach/list")
-    public CoachItemListVo getCoachList(@RequestParam("page") Integer page) {
+    public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.pageSize);
 
-        int coachTotal = service.getCoachTotal();
+        int coachTotal = service.countAll();
         coachItemListVo.setTotal(coachTotal);
         // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
@@ -60,7 +60,7 @@ public class CoachController {
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
-        List<CoachItemVo> list = service.getCoachList(page, Constant.pageSize).stream()
+        List<CoachItemVo> list = service.getCoachList(page, keyword, Constant.pageSize).stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -81,7 +81,7 @@ public class CoachController {
     @RequestMapping("/coach/detail")
     public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") BigInteger id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
-        Coach coachInfo = service.getCoachInfo(id);
+        Coach coachInfo = service.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
             return coachDetailsVo;
