@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo1.module.mapper.CoachMapper">
-<!--    经验总结 ：-->
-<!--    动态sql中要设计托底字段稳定sql结构-->
-<!--    不要在sql里面写注释，影响运行sql的可读性-->
+    <!--    经验总结 ：-->
+    <!--    动态sql中要设计托底字段稳定sql结构-->
+    <!--    不要在sql里面写注释，影响运行sql的可读性-->
+    <select id="getPageList" resultType="com.example.demo1.module.entity.Coach">
+        select * from coach
+        where is_deleted = 0
+        <if test="keyword != null">
+            and name like CONCAT('%', #{keyword}, '%')
+        </if>
+        order by id
+        limit #{index}, #{pageSize}
+    </select>
+
     <insert id="insert" parameterType="com.example.demo1.module.entity.Coach">
         insert into coach (
-            <if test="coach.pics != null and coach.pics != ''">`pics`,</if>
-            <if test="coach.name != null and coach.name != ''">`name`,</if>
-            <if test="coach.speciality != null and coach.speciality != ''">`speciality`,</if>
-            <if test="coach.intro != null and coach.intro != ''">`intro`,</if>
-            `update_time`,
-            `create_time`
+        <if test="coach.pics != null and coach.pics != ''">`pics`,</if>
+        <if test="coach.name != null and coach.name != ''">`name`,</if>
+        <if test="coach.speciality != null and coach.speciality != ''">`speciality`,</if>
+        <if test="coach.intro != null and coach.intro != ''">`intro`,</if>
+        `update_time`,
+        `create_time`
         )
         values (
-            <if test="coach.pics != null and coach.pics != ''">#{coach.pics},</if>
-            <if test="coach.name != null and coach.name != ''">#{coach.name},</if>
-            <if test="coach.speciality != null and coach.speciality != ''">#{coach.speciality},</if>
-            <if test="coach.intro != null and coach.intro != ''">#{coach.intro},</if>
-            #{coach.updateTime},
-            #{coach.createTime}
+        <if test="coach.pics != null and coach.pics != ''">#{coach.pics},</if>
+        <if test="coach.name != null and coach.name != ''">#{coach.name},</if>
+        <if test="coach.speciality != null and coach.speciality != ''">#{coach.speciality},</if>
+        <if test="coach.intro != null and coach.intro != ''">#{coach.intro},</if>
+        #{coach.updateTime},
+        #{coach.createTime}
         )
     </insert>
 

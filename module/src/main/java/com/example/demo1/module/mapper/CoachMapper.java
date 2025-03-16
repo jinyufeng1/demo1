@@ -8,15 +8,19 @@ import java.util.List;
 
 @Mapper //代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理
 public interface CoachMapper {
-    @Select("<script>" +
-        "select * from coach WHERE is_deleted = 0 " +
-        "<if test='keyword != null'>" +
-        "   and name like CONCAT('%', #{keyword}, '%')" +
-        "</if>" +
-        "order by id limit #{index}, #{pageSize}" +
-        "</script>")
+//    @Select(
+//        "<script>" +
+//            "select * from coach " +
+//            "where is_deleted = 0 " +
+//            "<if test='keyword != null'>" +
+//            "   and name like CONCAT('%', #{keyword}, '%')" +
+//            "</if>" +
+//            "order by id " +
+//            "limit #{index}, #{pageSize}" +
+//        "</script>"
+//    )
 //    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
-    List<Coach> getPageList(int index, String keyword, int pageSize);
+    List<Coach> getPageList(int index, int pageSize, String keyword);
 
     @Select("select count(*) from coach WHERE is_deleted = 0")
     int countAll();
