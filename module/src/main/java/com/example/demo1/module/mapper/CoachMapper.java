@@ -22,8 +22,8 @@ public interface CoachMapper {
 //    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
     List<Coach> getPageList(int index, int pageSize, String keyword);
 
-    @Select("select count(*) from coach WHERE is_deleted = 0")
-    int countAll();
+//    @Select("select count(*) from coach WHERE is_deleted = 0")
+    int count(String keyword);
 
 //    **************************五大基础方法**************************
     @Select("select * from coach WHERE id = #{id} and is_deleted = 0")

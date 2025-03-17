@@ -43,7 +43,7 @@ public class CoachController {
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setList(list);
-        coachItemListVo.setIsEnd(list.size() < Constant.pageSize);
+        coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
         return coachItemListVo;
     }
 

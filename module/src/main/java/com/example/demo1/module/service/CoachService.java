@@ -18,15 +18,19 @@ public class CoachService {
     private CoachMapper mapper;
 
     public List<Coach> getPageList(int page, String keyword) {
-        return mapper.getPageList((page - 1) * Constant.pageSize, Constant.pageSize, keyword);
+        return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword);
     }
 
-    public int countAll() {
-        return mapper.countAll();
+    public int count(String keyword) {
+        return mapper.count(keyword);
     }
 
     public Coach getById(BigInteger id) {
         return mapper.getById(id);
+    }
+
+    public Coach extractById(BigInteger id) {
+        return mapper.extractById(id);
     }
 
     public Boolean insert(AddOrUpdateCoachDTO dto) {

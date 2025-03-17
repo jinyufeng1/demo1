@@ -14,6 +14,14 @@
         limit #{index}, #{pageSize}
     </select>
 
+    <select id="count" resultType="java.lang.Integer">
+        select count(*) from coach
+        where is_deleted = 0
+        <if test="keyword != null">
+            and name like CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
     <insert id="insert" parameterType="com.example.demo1.module.entity.Coach">
         insert into coach (
         <if test="coach.pics != null and coach.pics != ''">`pics`,</if>

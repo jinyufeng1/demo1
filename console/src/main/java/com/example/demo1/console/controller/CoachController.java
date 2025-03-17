@@ -49,9 +49,9 @@ public class CoachController {
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
-        coachItemListVo.setPageSize(Constant.pageSize);
+        coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
-        int coachTotal = service.countAll();
+        int coachTotal = service.count(keyword);
         coachItemListVo.setTotal(coachTotal);
         // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
