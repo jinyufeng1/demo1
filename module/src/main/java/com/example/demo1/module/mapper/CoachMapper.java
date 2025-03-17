@@ -1,54 +1,31 @@
 package com.example.demo1.module.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.entity.Coach;
 import org.apache.ibatis.annotations.*;
 
+import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.List;
+
 
 @Mapper //代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理
-public interface CoachMapper {
-//    @Select(
-//        "<script>" +
-//            "select * from coach " +
-//            "where is_deleted = 0 " +
-//            "<if test='keyword != null'>" +
-//            "   and name like CONCAT('%', #{keyword}, '%')" +
-//            "</if>" +
-//            "order by id " +
-//            "limit #{index}, #{pageSize}" +
-//        "</script>"
-//    )
-//    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
-    List<Coach> getPageList(int index, int pageSize, String keyword);
+public interface CoachMapper extends BaseMapper<Coach> {
+    /*
+        BaseMapper中没有开启逻辑删除字段后查询一条数据不区分逻辑删除字段的方法
+     */
+    @Select("SELECT * FROM coach WHERE id = #{id}")
+    Coach extractById(BigInteger id);
 
-    @Select("select count(*) from coach WHERE is_deleted = 0")
-    int countAll();
-
-//    **************************五大基础方法**************************
-    @Select("select * from coach WHERE id = #{id} and is_deleted = 0")
-    Coach getById(@Param("id") BigInteger id);
-
-    @Select("select * from coach WHERE id = #{id}")
-    Coach extractById(@Param("id") BigInteger id);
-
-//    @Insert(
-//            "insert into coach  " +
-//            "(`name`,`pics`,`speciality`,`intro`,`create_time`,`update_time`) " +
-//            "VALUES(#{coach.name},#{coach.pics},#{coach.speciality},#{coach.intro},#{coach.createTime},#{coach.updateTime})"
-//    )
-//    todo 尝试@SelectProvider
-    int insert(@Param("coach") Coach coach);
-
-
-    @Update("update coach set is_deleted=1, update_time=#{timestamp} where id=#{id} limit 1")
-    int delete(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
-
-//    @Update(
-//            "update coach " +
-//            "set pics=#{coach.pics}, `name`=#{coach.name}, speciality=#{coach.speciality}, intro=#{coach.intro}, update_time=#{coach.updateTime} " +
-//            "where id=#{id} limit 1"
-//    )
-//    todo 尝试@UpdateProvider
-    int update(@Param("coach") Coach coach);
+    /*
+       自定义逻辑删除方法 默认deleteById方法不会触发MetaObjectHandler::updateFill方法
+     */
+    default int customRemoveById(Serializable id) {
+//      this.updateById(entity)不更新逻辑删除字段
+//      this.update(entity,wrapper)更新时没有传递entity，不会触发MetaObjectHandler::updateFill方法
+        Coach coach = new Coach();
+        coach.setIsDeleted(Constant.LOGIC_DELETE_VALUE);
+        return this.update(coach, Wrappers.<Coach>lambdaQuery().eq(Coach::getId, id));
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.demo1.app.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.demo1.app.domain.CoachDetailsVo;
 import com.example.demo1.app.domain.CoachItemListVo;
 import com.example.demo1.app.domain.CoachItemVo;
@@ -26,8 +27,9 @@ public class CoachController {
 
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
+        IPage<Coach> pageList = service.getPageList(page, keyword);
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
-        List<CoachItemVo> list = service.getPageList(page, keyword).stream()
+        List<CoachItemVo> list = pageList.getRecords().stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -43,7 +45,7 @@ public class CoachController {
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setList(list);
-        coachItemListVo.setIsEnd(list.size() < Constant.pageSize);
+        coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
         return coachItemListVo;
     }
 

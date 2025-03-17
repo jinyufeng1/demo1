@@ -1,5 +1,6 @@
 package com.example.demo1.console.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.demo1.console.domain.CoachDetailsVo;
 import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,18 +49,9 @@ public class CoachController {
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
-        coachItemListVo.setPageSize(Constant.pageSize);
-
-        int coachTotal = service.countAll();
-        coachItemListVo.setTotal(coachTotal);
-        // 总是都为0就不用查了，节约数据库访问
-        if (0 == coachTotal) {
-            coachItemListVo.setList(new ArrayList<>());
-            return coachItemListVo;
-        }
-
+        IPage<Coach> pageList = service.getPageList(page, keyword);
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
-        List<CoachItemVo> list = service.getPageList(page, keyword).stream()
+        List<CoachItemVo> list = pageList.getRecords().stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -73,8 +64,10 @@ public class CoachController {
                     coachItemVo.setSpeciality(e.getSpeciality());
                     return coachItemVo;
                 }).collect(Collectors.toList());
-        coachItemListVo.setList(list);
 
+        coachItemListVo.setList(list);
+        coachItemListVo.setTotal((int)pageList.getTotal());
+        coachItemListVo.setPageSize((int)pageList.getSize());
         return coachItemListVo;
     }
 
