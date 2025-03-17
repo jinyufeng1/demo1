@@ -22,10 +22,10 @@ public interface CoachMapper extends BaseMapper<Coach> {
        自定义逻辑删除方法 默认deleteById方法不会触发MetaObjectHandler::updateFill方法
      */
     default int customRemoveById(Serializable id) {
-//      this.updateById(entity)不更新逻辑删除字段
+//      this.updateById(entity)不更新逻辑删除字段 无法通过实体修改逻辑删除字段，update方法用实体传值也一样
 //      this.update(entity,wrapper)更新时没有传递entity，不会触发MetaObjectHandler::updateFill方法
-        Coach coach = new Coach();
-        coach.setIsDeleted(Constant.LOGIC_DELETE_VALUE);
-        return this.update(coach, Wrappers.<Coach>lambdaQuery().eq(Coach::getId, id));
+        return this.update(new Coach(), Wrappers.<Coach>lambdaUpdate()
+                .eq(Coach::getId, id)
+                .set(Coach::getIsDeleted,Constant.LOGIC_DELETE_VALUE));
     }
 }
