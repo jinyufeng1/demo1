@@ -22,7 +22,7 @@
         </if>
     </select>
 
-    <insert id="insert" parameterType="com.example.demo1.module.entity.Coach">
+    <insert id="insert" parameterType="com.example.demo1.module.entity.Coach" useGeneratedKeys="true" keyProperty="id">
         insert into coach (
         <if test="coach.pics != null and coach.pics != ''">`pics`,</if>
         <if test="coach.name != null and coach.name != ''">`name`,</if>

@@ -33,13 +33,11 @@ public class CoachService {
         return mapper.extractById(id);
     }
 
-    public Boolean insert(AddOrUpdateCoachDTO dto) {
-        Coach coach = new Coach();
-        BeanUtils.copyProperties(dto, coach);
+    private Boolean insert(Coach coach) {
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setCreateTime((int)timestamp);
         coach.setUpdateTime((int)timestamp);
-        return 0 != mapper.insert(coach);
+        return 0 < mapper.insert(coach);
     }
 
     public Boolean delete(BigInteger id) {
@@ -48,20 +46,42 @@ public class CoachService {
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
-        return 0 != mapper.delete(id, (int)timestamp);
-
+        return 0 < mapper.delete(id, (int)timestamp);
     }
 
-    public Boolean update(AddOrUpdateCoachDTO dto) {
-        BigInteger id = dto.getId();
+    private Boolean update(Coach coach) {
+        BigInteger id = coach.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
-            return false;
+            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
 
-        Coach coach = new Coach();
-        BeanUtils.copyProperties(dto, coach);
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setUpdateTime((int)timestamp);
-        return 0 != mapper.update(coach);
+        return 0 < mapper.update(coach);
+    }
+
+    /*
+        合并 insert & update
+        id校验
+        返回值为id
+     */
+    public BigInteger edit(AddOrUpdateCoachDTO dto) {
+        if (ObjectUtils.isEmpty(dto)) {
+            throw new RuntimeException("CoachService类，public BigInteger edit(AddOrUpdateCoachDTO dto)方法拒绝处理，dto对象为空对象");
+        }
+
+        // copy
+        Coach coach = new Coach();
+        BeanUtils.copyProperties(dto, coach);
+
+        Boolean result;
+        // id校验
+        if (ObjectUtils.isEmpty(coach.getId())) {
+            result = insert(coach);
+        }
+        else {
+            result = update(coach);
+        }
+        return result ? coach.getId() : null;
     }
 }

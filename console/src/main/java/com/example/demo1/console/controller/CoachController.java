@@ -29,9 +29,12 @@ public class CoachController {
 
     //新增教练信息
     @RequestMapping("/coach/add")
-    public Boolean addCoach(@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
+    public BigInteger addCoach(@RequestParam(name = "pics",required = false) String pics,
+                            @RequestParam("name") String name,
+                            @RequestParam(name = "speciality", required = false) String speciality,
+                            @RequestParam(name = "intro", required = false) String intro) {
         // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-        return service.insert(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
+        return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
     }
 
     //删除教练信息
@@ -41,13 +44,18 @@ public class CoachController {
     }
 
     @RequestMapping("/coach/update")
-    public Boolean updateCoach(@RequestParam(name = "id") BigInteger id,@RequestParam("pics") String pics, @RequestParam("name")  String name, @RequestParam("speciality") String speciality, @RequestParam("intro")  String intro) {
+    public BigInteger updateCoach(@RequestParam(name = "id") BigInteger id,
+                               @RequestParam(name = "pics",required = false) String pics,
+                               @RequestParam(name = "name",required = false) String name,
+                               @RequestParam(name = "speciality",required = false) String speciality,
+                               @RequestParam(name = "intro",required = false) String intro) {
         // trim to name;
-        return service.update(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
+        return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
     }
 
     @RequestMapping("/coach/list")
-    public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
+    public CoachItemListVo getCoachList(@RequestParam("page") Integer page,
+                                        @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
