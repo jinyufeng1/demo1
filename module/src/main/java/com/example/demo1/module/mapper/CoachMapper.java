@@ -38,7 +38,6 @@ public interface CoachMapper {
 //            "VALUES(#{coach.name},#{coach.pics},#{coach.speciality},#{coach.intro},#{coach.createTime},#{coach.updateTime})"
 //    )
 //    todo 尝试@SelectProvider
-    @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(@Param("coach") Coach coach);
 
 

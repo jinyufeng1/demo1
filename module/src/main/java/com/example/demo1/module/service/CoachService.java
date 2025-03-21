@@ -65,7 +65,7 @@ public class CoachService {
         id校验
         返回值为id
      */
-    public BigInteger edit(AddOrUpdateCoachDTO dto) {
+    public String edit(AddOrUpdateCoachDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
             throw new RuntimeException("CoachService类，public BigInteger edit(AddOrUpdateCoachDTO dto)方法拒绝处理，dto对象为空对象");
         }
@@ -82,6 +82,6 @@ public class CoachService {
         else {
             result = update(coach);
         }
-        return result ? coach.getId() : null;
+        return result ? coach.getId().toString() : null;
     }
 }

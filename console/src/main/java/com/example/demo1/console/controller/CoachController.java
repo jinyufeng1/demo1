@@ -29,12 +29,19 @@ public class CoachController {
 
     //新增教练信息
     @RequestMapping("/coach/add")
-    public BigInteger addCoach(@RequestParam(name = "pics",required = false) String pics,
+    public String addCoach(@RequestParam(name = "pics",required = false) String pics,
                             @RequestParam("name") String name,
                             @RequestParam(name = "speciality", required = false) String speciality,
                             @RequestParam(name = "intro", required = false) String intro) {
-        // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-        return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
+        try {
+            // trim to name; Due to required=false in springmvc,name can't be null at all!!!
+            return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+            // 返回异常信息
+            return "add接口捕获异常信息：" + e.getMessage();
+        }
     }
 
     //删除教练信息
@@ -44,13 +51,19 @@ public class CoachController {
     }
 
     @RequestMapping("/coach/update")
-    public BigInteger updateCoach(@RequestParam(name = "id") BigInteger id,
+    public String updateCoach(@RequestParam(name = "id") BigInteger id,
                                @RequestParam(name = "pics",required = false) String pics,
                                @RequestParam(name = "name",required = false) String name,
-                               @RequestParam(name = "speciality",required = false) String speciality,
-                               @RequestParam(name = "intro",required = false) String intro) {
-        // trim to name;
-        return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
+                               @RequestParam(name = "speciality",required = false) String speciality, @RequestParam(name = "intro",required = false) String intro) {
+        try {
+            // trim to name;
+            return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+            // 返回异常信息
+            return "upate接口捕获异常信息：" + e.getMessage();
+        }
     }
 
     @RequestMapping("/coach/list")
