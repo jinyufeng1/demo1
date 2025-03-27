@@ -11,7 +11,7 @@
 
 	<!--自己-->
 	<groupId>org.example.demo1</groupId>
-	<artifactId>api</artifactId>
+	<artifactId>app</artifactId>
 
 	<!--依赖-->
 	<dependencies>
