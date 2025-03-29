@@ -30,5 +30,5 @@ public interface CategoryMapper {
 	
 	int update(@Param("entity") Category entity);
 
-	List<Category> getList(String keyword);
+	List<Category> getList(@Param("keyword") String keyword);
 }

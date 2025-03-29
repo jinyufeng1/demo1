@@ -56,15 +56,13 @@ public class CodeGenerator {
     private static GlobalConfig getGlobalConfig(String projectPath) {
         GlobalConfig gc = new GlobalConfig();
         gc.setOutputDir(projectPath + "/src/main/java");
-        gc.setAuthor("jobob");
+        gc.setAuthor("我叫小呆呆");
         gc.setOpen(false);
-        gc.setBaseResultMap(true);
         gc.setFileOverride(true);
         gc.setEntityName("%s");
         gc.setMapperName("%sMapper");
         gc.setXmlName("%sMapper");
         gc.setServiceName("%sService");
-        gc.setServiceImplName("%sServiceImpl");
 
         return gc;
     }

@@ -2,33 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo1.module.mapper.CategoryMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.example.demo1.module.entity.Category">
-        <id column="id" property="id" />
-        <result column="name" property="name" />
-        <result column="pic" property="pic" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="is_deleted" property="isDeleted" />
-    </resultMap>
-
     <insert id="insert" parameterType="com.example.demo1.module.entity.Category" useGeneratedKeys="true" keyProperty="id">
         insert into category (
 		<trim suffixOverrides=",">
 			<if test="entity.name != null and entity.name != ''">`name`,</if>
 			<if test="entity.pic != null and entity.pic != ''">`pic`,</if>
-			<if test="entity.createTime != null and entity.createTime != ''">`create_time`,</if>
-			<if test="entity.updateTime != null and entity.updateTime != ''">`update_time`,</if>
-			<if test="entity.isDeleted != null and entity.isDeleted != ''">`is_deleted`,</if>
+			<if test="entity.createTime != null">`create_time`,</if>
+			<if test="entity.updateTime != null">`update_time`,</if>
+			<if test="entity.isDeleted != null">`is_deleted`,</if>
 		</trim>
         )
         values (
 		<trim suffixOverrides=",">
 			<if test="entity.name != null and entity.name != ''">#{entity.name},</if>
 			<if test="entity.pic != null and entity.pic != ''">#{entity.pic},</if>
-			<if test="entity.createTime != null and entity.createTime != ''">#{entity.createTime},</if>
-			<if test="entity.updateTime != null and entity.updateTime != ''">#{entity.updateTime},</if>
-			<if test="entity.isDeleted != null and entity.isDeleted != ''">#{entity.isDeleted},</if>
+			<if test="entity.createTime != null">#{entity.createTime},</if>
+			<if test="entity.updateTime != null">#{entity.updateTime},</if>
+			<if test="entity.isDeleted != null">#{entity.isDeleted},</if>
 		</trim>
         )
     </insert>
@@ -39,9 +29,9 @@
 		<trim suffixOverrides=",">
 			<if test="entity.name != null and entity.name != ''">`name` = #{entity.name},</if>
 			<if test="entity.pic != null and entity.pic != ''">`pic` = #{entity.pic},</if>
-			<if test="entity.createTime != null and entity.createTime != ''">`create_time` = #{entity.createTime},</if>
-			<if test="entity.updateTime != null and entity.updateTime != ''">`update_time` = #{entity.updateTime},</if>
-			<if test="entity.isDeleted != null and entity.isDeleted != ''">`is_deleted` = #{entity.isDeleted},</if>
+			<if test="entity.createTime != null">`create_time` = #{entity.createTime},</if>
+			<if test="entity.updateTime != null">`update_time` = #{entity.updateTime},</if>
+			<if test="entity.isDeleted != null">`is_deleted` = #{entity.isDeleted},</if>
 		</trim>
         where id = #{entity.id} limit 1
     </update>
