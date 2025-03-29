@@ -12,4 +12,10 @@ public class CoachDetailsVo {
 
 //    介绍
     private String intro;
+
+//    分类
+    private String category;
+
+//    分类图标
+    private String icon;
 }

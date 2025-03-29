@@ -6,7 +6,9 @@ import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
+import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
+import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -15,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,15 +29,24 @@ public class CoachController {
     @Autowired
     private CoachService service;
 
+    @Autowired
+    private CategoryService categoryService;
+
     //新增教练信息
     @RequestMapping("/coach/add")
     public String addCoach(@RequestParam(name = "pics",required = false) String pics,
-                            @RequestParam("name") String name,
-                            @RequestParam(name = "speciality", required = false) String speciality,
-                            @RequestParam(name = "intro", required = false) String intro) {
+                           @RequestParam("name") String name,
+                           @RequestParam("categoryId") Long categoryId,
+                           @RequestParam(name = "speciality", required = false) String speciality,
+                           @RequestParam(name = "intro", required = false) String intro) {
         try {
+            // 分类校验
+            if (ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
+                throw new RuntimeException("使用无效的categoryId");
+            }
+
             // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-            return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro));
+            return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -46,18 +57,28 @@ public class CoachController {
 
     //删除教练信息
     @RequestMapping("/coach/del")
-    public Boolean delCoach(@RequestParam("id") BigInteger id) {
+    public Boolean delCoach(@RequestParam("id") Long id) {
         return service.delete(id);
     }
 
+    //修改教练信息
     @RequestMapping("/coach/update")
-    public String updateCoach(@RequestParam(name = "id") BigInteger id,
-                               @RequestParam(name = "pics",required = false) String pics,
-                               @RequestParam(name = "name",required = false) String name,
-                               @RequestParam(name = "speciality",required = false) String speciality, @RequestParam(name = "intro",required = false) String intro) {
+    public String updateCoach(@RequestParam(name = "id") Long id,
+                              @RequestParam(name = "categoryId", required = false) Long categoryId,
+                              @RequestParam(name = "pics",required = false) String pics,
+                              @RequestParam(name = "name",required = false) String name,
+                              @RequestParam(name = "speciality",required = false) String speciality,
+                              @RequestParam(name = "intro",required = false) String intro) {
         try {
+            // 分类校验
+            if (null != categoryId) {
+                if (ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
+                    throw new RuntimeException("使用无效的categoryId");
+                }
+            }
+
             // trim to name;
-            return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro));
+            return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -80,7 +101,10 @@ public class CoachController {
             return coachItemListVo;
         }
 
-        //如果没有数据，getCoachList会拿到一个空的ArrayList对象，list同样
+        // 获取分类映射列表
+        Map<Long, String> categoryMap = categoryService.getList(null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+
+        //如果没有数据，getCoachList会拿到一个空的ArrayList对象
         List<CoachItemVo> list = service.getPageList(page, keyword).stream()
                 .map(e -> {
                     // vo就是再controller层做转换
@@ -92,6 +116,7 @@ public class CoachController {
                     String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
                     coachItemVo.setPic(pic);
                     coachItemVo.setSpeciality(e.getSpeciality());
+                    coachItemVo.setCategory(categoryMap.get(e.getCategoryId()));
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);
@@ -100,7 +125,7 @@ public class CoachController {
     }
 
     @RequestMapping("/coach/detail")
-    public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") BigInteger id) {
+    public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") Long id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
         Coach coachInfo = service.getById(id);
         //自己写方法判断
@@ -115,16 +140,16 @@ public class CoachController {
             String[] split = pics.split(Constant.PIC_SPLIT);
             coachDetailsVo.setPics(Arrays.asList(split));
         }
-        Integer createTime = coachInfo.getCreateTime();
-        if (!ObjectUtils.isEmpty(createTime)) {
-            coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(createTime));
+
+        // 获取分类信息
+        Category category = categoryService.getById(coachInfo.getCategoryId());
+        if (!ObjectUtils.isEmpty(category)) {
+            coachDetailsVo.setCategory(category.getName());
+            coachDetailsVo.setIcon(category.getPic());
         }
 
-        Integer updateTime = coachInfo.getUpdateTime();
-        if (!ObjectUtils.isEmpty(updateTime)) {
-            coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(updateTime));
-        }
-
+        coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime()));
+        coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime()));
         return coachDetailsVo;
     }
 }

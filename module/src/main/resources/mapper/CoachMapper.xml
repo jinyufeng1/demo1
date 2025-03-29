@@ -28,6 +28,7 @@
         <if test="coach.name != null and coach.name != ''">`name`,</if>
         <if test="coach.speciality != null and coach.speciality != ''">`speciality`,</if>
         <if test="coach.intro != null and coach.intro != ''">`intro`,</if>
+        `category_id`,
         `update_time`,
         `create_time`
         )
@@ -36,6 +37,7 @@
         <if test="coach.name != null and coach.name != ''">#{coach.name},</if>
         <if test="coach.speciality != null and coach.speciality != ''">#{coach.speciality},</if>
         <if test="coach.intro != null and coach.intro != ''">#{coach.intro},</if>
+        #{coach.categoryId},
         #{coach.updateTime},
         #{coach.createTime}
         )
@@ -48,6 +50,7 @@
         <if test="coach.name != null and coach.name != ''">`name` = #{coach.name},</if>
         <if test="coach.speciality != null and coach.speciality != ''">`speciality` = #{coach.speciality},</if>
         <if test="coach.intro != null and coach.intro != ''">`intro` = #{coach.intro},</if>
+        <if test="coach.categoryId != null and coach.categoryId != ''">`category_id` = #{coach.categoryId},</if>
         `update_time` = #{coach.updateTime}
         where id=#{coach.id} limit 1
     </update>

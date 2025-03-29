@@ -10,7 +10,6 @@
 	</parent>
 
 	<!--自己-->
-	<groupId>org.example.demo1</groupId>
 	<artifactId>app</artifactId>
 
 	<!--依赖-->
@@ -27,7 +26,7 @@
 
 		<!--依赖子项目-->
 		<dependency>
-			<groupId>org.example.demo1</groupId>
+			<groupId>com.example.demo1</groupId>
 			<artifactId>module</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

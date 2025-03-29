@@ -10,7 +10,6 @@
     </parent>
 
     <!--自己-->
-    <groupId>org.example.demo1</groupId>
     <artifactId>module</artifactId>
 
     <dependencies>

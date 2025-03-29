@@ -21,6 +21,7 @@
         <module>app</module>
         <module>console</module>
         <module>module</module>
+        <module>codegenerator</module>
     </modules>
 
     <properties>

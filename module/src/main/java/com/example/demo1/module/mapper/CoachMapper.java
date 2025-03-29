@@ -3,7 +3,6 @@ package com.example.demo1.module.mapper;
 import com.example.demo1.module.entity.Coach;
 import org.apache.ibatis.annotations.*;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @Mapper //代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理
@@ -27,10 +26,10 @@ public interface CoachMapper {
 
 //    **************************五大基础方法**************************
     @Select("select * from coach WHERE id = #{id} and is_deleted = 0")
-    Coach getById(@Param("id") BigInteger id);
+    Coach getById(@Param("id") Long id);
 
     @Select("select * from coach WHERE id = #{id}")
-    Coach extractById(@Param("id") BigInteger id);
+    Coach extractById(@Param("id") Long id);
 
 //    @Insert(
 //            "insert into coach  " +
@@ -42,7 +41,7 @@ public interface CoachMapper {
 
 
     @Update("update coach set is_deleted=1, update_time=#{timestamp} where id=#{id} limit 1")
-    int delete(@Param("id") BigInteger id, @Param("timestamp") Integer timestamp);
+    int delete(@Param("id") Long id, @Param("timestamp") Integer timestamp);
 
 //    @Update(
 //            "update coach " +

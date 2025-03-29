@@ -2,13 +2,12 @@ package com.example.demo1.console.domain;
 
 import lombok.Data;
 
-import java.math.BigInteger;
 
 //列表元素
 @Data
 public class CoachItemVo {
 //    数据id
-    private BigInteger id;
+    private Long id;
 
 //    封面
     private String pic;
@@ -18,4 +17,7 @@ public class CoachItemVo {
 
 //    专长
     private String speciality;
+
+//    分类
+    private String category;
 }

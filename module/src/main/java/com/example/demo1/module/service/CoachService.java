@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.math.BigInteger;
 import java.util.List;
 
 @Service
@@ -25,11 +24,11 @@ public class CoachService {
         return mapper.count(keyword);
     }
 
-    public Coach getById(BigInteger id) {
+    public Coach getById(Long id) {
         return mapper.getById(id);
     }
 
-    public Coach extractById(BigInteger id) {
+    public Coach extractById(Long id) {
         return mapper.extractById(id);
     }
 
@@ -40,7 +39,7 @@ public class CoachService {
         return 0 < mapper.insert(coach);
     }
 
-    public Boolean delete(BigInteger id) {
+    public Boolean delete(Long id) {
         if (ObjectUtils.isEmpty(getById(id))) {
             return false;
         }
@@ -50,7 +49,7 @@ public class CoachService {
     }
 
     private Boolean update(Coach coach) {
-        BigInteger id = coach.getId();
+        Long id = coach.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
             throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
@@ -62,12 +61,10 @@ public class CoachService {
 
     /*
         合并 insert & update
-        id校验
-        返回值为id
      */
     public String edit(AddOrUpdateCoachDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("CoachService类，public BigInteger edit(AddOrUpdateCoachDTO dto)方法拒绝处理，dto对象为空对象");
+            throw new RuntimeException("CoachService类，public String edit(AddOrUpdateCoachDTO dto)方法拒绝处理，dto对象为空对象");
         }
 
         // copy
