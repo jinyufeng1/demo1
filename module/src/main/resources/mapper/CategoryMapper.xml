@@ -16,9 +16,9 @@
 		<trim suffixOverrides=",">
 			<if test="entity.name != null and entity.name != ''">#{entity.name},</if>
 			<if test="entity.pic != null and entity.pic != ''">#{entity.pic},</if>
-			<if test="entity.createTime != null">#{entity.createTime},</if>
-			<if test="entity.updateTime != null">#{entity.updateTime},</if>
-			<if test="entity.isDeleted != null">#{entity.isDeleted},</if>
+            <if test="entity.createTime != null">#{entity.createTime},</if>
+            <if test="entity.updateTime != null">#{entity.updateTime},</if>
+            <if test="entity.isDeleted != null">#{entity.isDeleted},</if>
 		</trim>
         )
     </insert>
@@ -41,6 +41,12 @@
 		where is_deleted = 0
 		<if test="keyword != null">
 			and name like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test="ids != null and ids.size > 0">
+			and id in
+			<foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+				#{id}
+			</foreach>
 		</if>
 		order by id
 	</select>

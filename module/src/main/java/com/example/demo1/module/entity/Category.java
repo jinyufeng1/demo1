@@ -1,34 +1,21 @@
 package com.example.demo1.module.entity;
 
-import java.io.Serializable;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * <p>
  * 分类信息表
  * </p>
  *
- * @author jobob
- * @since 2025-03-28
+ * @author 我叫小呆呆
+ * @since 2025-03-30
  */
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class Category implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class Category {
     private Long id;
-
     private String name;
-
     private String pic;
-
     private Integer createTime;
-
     private Integer updateTime;
-
     private Integer isDeleted;
-
-
 }

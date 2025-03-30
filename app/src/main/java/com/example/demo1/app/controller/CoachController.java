@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,8 +36,11 @@ public class CoachController {
             return coachItemListVo;
         }
 
+        // 没有取全表，而是根据id进行in条件查询
+        Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
+
         // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // vo就是再controller层做转换
         List<CoachItemVo> list = pageList.stream()
@@ -87,20 +87,5 @@ public class CoachController {
         }
 
         return coachDetailsVo;
-    }
-
-    @RequestMapping("/category/list")
-    public CategoryItemListVo getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
-        List<CategoryItemVo> list = categoryService.getList(keyword).stream().map(e -> {
-            CategoryItemVo categoryItemVo = new CategoryItemVo();
-            categoryItemVo.setId(e.getId());
-            categoryItemVo.setName(e.getName());
-            categoryItemVo.setIcon(e.getPic());
-            return categoryItemVo;
-        }).collect(Collectors.toList());
-
-        CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
-        categoryItemListVo.setList(list);
-        return categoryItemListVo;
     }
 }

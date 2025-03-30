@@ -6,14 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
  * 分类信息表 服务类
  * </p>
  *
- * @author jobob
- * @since 2025-03-28
+ * @author 我叫小呆呆
+ * @since 2025-03-30
  */
 @Service
 public class CategoryService {
@@ -21,7 +22,7 @@ public class CategoryService {
     @Resource
     private CategoryMapper mapper;
 
-    //    **************************五大基础方法**************************
+//    **************************五大基础方法**************************
 	public Category getById(Long id) {
         return mapper.getById(id);
     }
@@ -38,7 +39,7 @@ public class CategoryService {
         long timestamp = System.currentTimeMillis() / 1000;
         return 0 < mapper.delete(id, (int)timestamp);
     }
-	
+
 	public Boolean insert(Category entity) {
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
@@ -57,7 +58,7 @@ public class CategoryService {
         return 0 < mapper.update(entity);
     }
 
-    public List<Category> getList(String keyword) {
-        return mapper.getList(keyword);
+    public List<Category> getList(String keyword, Set<Long> ids) {
+        return mapper.getList(keyword, ids);
     }
 }

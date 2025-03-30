@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -101,11 +98,16 @@ public class CoachController {
             return coachItemListVo;
         }
 
-        // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
-
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<CoachItemVo> list = service.getPageList(page, keyword).stream()
+        List<Coach> pageList = service.getPageList(page, keyword);
+
+        // 没有取全表，而是根据id进行in条件查询
+        Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
+
+        // 获取分类映射列表
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<CoachItemVo> list = pageList.stream()
                 .map(e -> {
                     // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();

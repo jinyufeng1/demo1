@@ -6,14 +6,15 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
  * 分类信息表 Mapper 接口
  * </p>
  *
- * @author jobob
- * @since 2025-03-28
+ * @author 我叫小呆呆
+ * @since 2025-03-30
  */
 public interface CategoryMapper {
 //    **************************五大基础方法**************************
@@ -30,5 +31,5 @@ public interface CategoryMapper {
 	
 	int update(@Param("entity") Category entity);
 
-	List<Category> getList(@Param("keyword") String keyword);
+	List<Category> getList(@Param("keyword") String keyword, @Param("ids") Set<Long> ids);
 }

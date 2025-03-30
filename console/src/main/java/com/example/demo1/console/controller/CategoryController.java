@@ -43,7 +43,7 @@ public class CategoryController {
 
     @RequestMapping("/category/list")
     public CategoryItemListVo getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
-        List<CategoryItemVo> list = categoryService.getList(keyword).stream().map(e -> {
+        List<CategoryItemVo> list = categoryService.getList(keyword, null).stream().map(e -> {
             CategoryItemVo categoryItemVo = new CategoryItemVo();
             categoryItemVo.setId(e.getId());
             categoryItemVo.setName(e.getName());

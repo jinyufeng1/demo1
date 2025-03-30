@@ -11,8 +11,8 @@ public class Coach {
     private String pics;
     private String speciality;
     private String intro;
+    private Long categoryId;
     private Integer createTime;
     private Integer updateTime;
     private Integer isDeleted;
-    private Long categoryId;
 }
