@@ -10,10 +10,10 @@
     </parent>
 
     <!--自己-->
-    <groupId>org.example.demo1</groupId>
     <artifactId>module</artifactId>
 
     <dependencies>
+<!--        在 Maven 项目中使用 MyBatis\MyBatis-Plus 时，如果不显式指定数据库连接池，Spring Boot 默认会使用 HikariCP 作为数据库连接池-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -23,7 +23,21 @@
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.0.31</version>
-
+        </dependency>
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-generator</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.31</version>
         </dependency>
     </dependencies>
 </project>

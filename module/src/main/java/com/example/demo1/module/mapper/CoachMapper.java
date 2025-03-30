@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 
-@Mapper //代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理
+//@Mapper
+//代理对象会被注册到 MyBatis 的 SqlSession 中，但不会直接交给 Spring 容器管理，因为是多模块的引用方式，这个注解不会被扫描到，不起作用
+//在springboot启动类加@MapperScan扫描整个包，让Spring自动扫描并注册这些接口为Bean
 public interface CoachMapper extends BaseMapper<Coach> {
     /*
         BaseMapper中没有开启逻辑删除字段后查询一条数据不区分逻辑删除字段的方法
