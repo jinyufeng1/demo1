@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class CoachController {
 
     @Autowired
-    private CoachService service;
+    private CoachService coachService;
 
     @Autowired
     private CategoryService categoryService;
@@ -29,7 +29,7 @@ public class CoachController {
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = service.getPageList(page, keyword);
+        List<Coach> pageList = coachService.getPageList(page, keyword);
         if (pageList.isEmpty()) {
             coachItemListVo.setList(new ArrayList<>());
             coachItemListVo.setIsEnd(true);
@@ -56,8 +56,14 @@ public class CoachController {
                     coachItemVo.setCategory(categoryMap.get(e.getCategoryId()));
                     return coachItemVo;
                 }).collect(Collectors.toList());
-
         coachItemListVo.setList(list);
+
+        // 判断是否有分类数据取空的情况
+        if (list.stream().anyMatch(e -> null == e.getCategory())) {
+            // 过滤掉category为空的实体元素
+            coachItemListVo.setList(list.stream().filter(e -> null != e.getCategory()).collect(Collectors.toList()));
+        }
+
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
         return coachItemListVo;
     }
@@ -65,9 +71,15 @@ public class CoachController {
     @RequestMapping("/coach/detail")
     public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") Long id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
-        Coach coachInfo = service.getById(id);
+        Coach coachInfo = coachService.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
+            return coachDetailsVo;
+        }
+
+        // 获取分类信息
+        Category category = categoryService.getById(coachInfo.getCategoryId());
+        if (ObjectUtils.isEmpty(category)) {
             return coachDetailsVo;
         }
 
@@ -79,12 +91,8 @@ public class CoachController {
             coachDetailsVo.setPics(Arrays.asList(split));
         }
 
-        // 获取分类信息
-        Category category = categoryService.getById(coachInfo.getCategoryId());
-        if (!ObjectUtils.isEmpty(category)) {
-            coachDetailsVo.setCategory(category.getName());
-            coachDetailsVo.setIcon(category.getPic());
-        }
+        coachDetailsVo.setCategory(category.getName());
+        coachDetailsVo.setIcon(category.getPic());
 
         return coachDetailsVo;
     }

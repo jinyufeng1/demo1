@@ -37,7 +37,7 @@ public interface CoachMapper {
 //            "VALUES(#{coach.name},#{coach.pics},#{coach.speciality},#{coach.intro},#{coach.createTime},#{coach.updateTime})"
 //    )
 //    todo 尝试@SelectProvider
-    int insert(@Param("coach") Coach coach);
+    int insert(@Param("entity") Coach entity);
 
 
     @Update("update coach set is_deleted=1, update_time=#{timestamp} where id=#{id} limit 1")
@@ -49,5 +49,9 @@ public interface CoachMapper {
 //            "where id=#{id} limit 1"
 //    )
 //    todo 尝试@UpdateProvider
-    int update(@Param("coach") Coach coach);
+    int update(@Param("entity") Coach entity);
+
+    List<Coach> getByProperty(@Param("entity") Coach entity);
+
+    int deleteByProperty(@Param("entity") Coach entity, @Param("timestamp") Integer timestamp);
 }

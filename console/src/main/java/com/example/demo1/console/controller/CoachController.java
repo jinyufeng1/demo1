@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class CoachController {
 
     @Autowired
-    private CoachService service;
+    private CoachService coachService;
 
     @Autowired
     private CategoryService categoryService;
@@ -37,13 +37,8 @@ public class CoachController {
                            @RequestParam(name = "speciality", required = false) String speciality,
                            @RequestParam(name = "intro", required = false) String intro) {
         try {
-            // 分类校验
-            if (ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
-                throw new RuntimeException("使用无效的categoryId");
-            }
-
             // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-            return service.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
+            return coachService.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -55,7 +50,7 @@ public class CoachController {
     //删除教练信息
     @RequestMapping("/coach/del")
     public Boolean delCoach(@RequestParam("id") Long id) {
-        return service.delete(id);
+        return coachService.delete(id);
     }
 
     //修改教练信息
@@ -67,15 +62,8 @@ public class CoachController {
                               @RequestParam(name = "speciality",required = false) String speciality,
                               @RequestParam(name = "intro",required = false) String intro) {
         try {
-            // 分类校验
-            if (null != categoryId) {
-                if (ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
-                    throw new RuntimeException("使用无效的categoryId");
-                }
-            }
-
             // trim to name;
-            return service.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
+            return coachService.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -90,7 +78,7 @@ public class CoachController {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
-        int coachTotal = service.count(keyword);
+        int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
         // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
@@ -99,7 +87,7 @@ public class CoachController {
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = service.getPageList(page, keyword);
+        List<Coach> pageList = coachService.getPageList(page, keyword);
 
         // 没有取全表，而是根据id进行in条件查询
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
@@ -123,15 +111,29 @@ public class CoachController {
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);
 
+        // 判断是否有分类数据取空的情况
+        if (list.stream().anyMatch(e -> null == e.getCategory())) {
+            // 过滤掉category为空的实体元素
+            coachItemListVo.setList(list.stream().filter(e -> null != e.getCategory()).collect(Collectors.toList()));
+            // 重新设置total
+            coachItemListVo.setTotal(coachItemListVo.getTotal() - (list.size() - coachItemListVo.getList().size()));
+        }
+
         return coachItemListVo;
     }
 
     @RequestMapping("/coach/detail")
     public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") Long id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
-        Coach coachInfo = service.getById(id);
+        Coach coachInfo = coachService.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
+            return coachDetailsVo;
+        }
+
+        // 获取分类信息
+        Category category = categoryService.getById(coachInfo.getCategoryId());
+        if (ObjectUtils.isEmpty(category)) {
             return coachDetailsVo;
         }
 
@@ -143,13 +145,8 @@ public class CoachController {
             coachDetailsVo.setPics(Arrays.asList(split));
         }
 
-        // 获取分类信息
-        Category category = categoryService.getById(coachInfo.getCategoryId());
-        if (!ObjectUtils.isEmpty(category)) {
-            coachDetailsVo.setCategory(category.getName());
-            coachDetailsVo.setIcon(category.getPic());
-        }
-
+        coachDetailsVo.setCategory(category.getName());
+        coachDetailsVo.setIcon(category.getPic());
         coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime()));
         coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime()));
         return coachDetailsVo;

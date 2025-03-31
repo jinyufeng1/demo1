@@ -4,7 +4,9 @@ import com.example.demo1.console.domain.CategoryItemListVo;
 import com.example.demo1.console.domain.CategoryItemVo;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.entity.Category;
+import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
+import com.example.demo1.module.service.CoachService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +17,9 @@ import java.util.stream.Collectors;
 
 @RestController
 public class CategoryController {
+
+    @Autowired
+    private CoachService coachService;
     @Autowired
     private CategoryService categoryService;
 
@@ -28,8 +33,14 @@ public class CategoryController {
 
     @RequestMapping("/category/del")
     public Boolean deleteCategory(@RequestParam("id") Long id) {
-        return categoryService.delete(id);
-
+        Boolean ret = categoryService.delete(id);
+        if (ret) {
+            //为解决循环依赖，将coachService提升一级，删除依赖这个分类的教练数据
+            Coach entity = new Coach();
+            entity.setCategoryId(id);
+            coachService.deleteByProperty(entity);
+        }
+        return ret;
     }
 
     @RequestMapping("/category/update")

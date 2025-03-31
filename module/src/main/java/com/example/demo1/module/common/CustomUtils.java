@@ -1,5 +1,6 @@
 package com.example.demo1.module.common;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -10,5 +11,28 @@ public class CustomUtils {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 转换为字符串
         return formatter.format(date);
+    }
+
+    /**
+     * 判断对象是否为空指针或者所有字段属性都为空指针
+     * @param obj
+     * @return
+     */
+    public static boolean isAllFieldsNull(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        for (Field field : obj.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(obj);
+                if (value != null && !"".equals(value)) {
+                    return false;
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 }
