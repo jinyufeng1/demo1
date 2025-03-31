@@ -5,6 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CustomUtils {
+
+    /**
+     * 时间戳数字转化成格式化字符串
+     * @param timestamp
+     * @return
+     */
     public static String transformTimestamp(int timestamp) {
         Date date = new Date(timestamp * 1000L); //1000和1000L int类型不能准确转换时间戳
         // 定义日期格式
