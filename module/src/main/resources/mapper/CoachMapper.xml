@@ -77,7 +77,7 @@
         order by id
     </select>
 
-    <update id="deleteByProperty" parameterType="map" >
+    <update id="deleteByProperty">
         update coach
         set is_deleted = 1, update_time = #{timestamp}
         where is_deleted = 0
