@@ -25,7 +25,7 @@
             and (
             `name` like CONCAT('%', #{keyword}, '%')
             or
-            category_id in ( select id from category where name like CONCAT('%', #{keyword}, '%') )
+            category_id in ( select id from category where is_deleted = 0 and name like CONCAT('%', #{keyword}, '%') )
             )
         </if>
     </select>
