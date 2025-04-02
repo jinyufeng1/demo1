@@ -9,6 +9,7 @@ public class GlobalExceptionHandler {
     // 处理所有其他异常
     @ExceptionHandler(Exception.class)
     public String handleException(Exception ex) {
+        ex.printStackTrace();
         return "系统异常: " + ex.getMessage();
     }
 }

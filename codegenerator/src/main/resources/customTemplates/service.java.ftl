@@ -35,14 +35,14 @@ public class ${table.serviceName} {
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
-        return 0 < mapper.delete(id, (int)timestamp);
+        return 1 == mapper.delete(id, (int)timestamp);
     }
 
 	public Boolean insert(${entity} entity) {
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
         entity.setUpdateTime((int)timestamp);
-        return 0 < mapper.insert(entity);
+        return 1 == mapper.insert(entity);
     }
 
     public Boolean update(${entity} entity) {
@@ -53,6 +53,6 @@ public class ${table.serviceName} {
 
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setUpdateTime((int)timestamp);
-        return 0 < mapper.update(entity);
+        return 1 == mapper.update(entity);
     }
 }

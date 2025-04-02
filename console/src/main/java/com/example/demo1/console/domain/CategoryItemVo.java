@@ -2,20 +2,25 @@ package com.example.demo1.console.domain;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CategoryItemVo {
-//    数据id
+    // 数据id
     private Long id;
 
-//    名称
+    // 名称
     private String name;
 
-//    图标
+    // 图标
     private String icon;
 
-//    创建时间
+    // 创建时间
     private String createTime;
 
-//    修改时间
+    // 修改时间
     private String updateTime;
+
+    // 子节点
+    private List<CategoryItemVo> children;
 }

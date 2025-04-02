@@ -19,10 +19,12 @@ public interface CoachMapper {
 //        "</script>"
 //    )
 //    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
-    List<Coach> getPageList(int index, int pageSize, String keyword);
+    List<Coach> getPageList(@Param("index") int index,
+                            @Param("pageSize") int pageSize,
+                            @Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
 
 //    @Select("select count(*) from coach WHERE is_deleted = 0")
-    int count(String keyword);
+    int count(@Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
 
 //    **************************五大基础方法**************************
     @Select("select * from coach WHERE id = #{id} and is_deleted = 0")

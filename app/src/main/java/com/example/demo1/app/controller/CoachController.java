@@ -28,8 +28,21 @@ public class CoachController {
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
+        // 作为额外的条件
+        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
+        String orCategoryIds = "";
+        if (!orCategoryIdList.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Long aLong : orCategoryIdList) {
+                builder.append(aLong).append(",");
+            }
+            orCategoryIds = builder.toString();
+            // 去掉最后一个逗号
+            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
+        }
+
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(page, keyword);
+        List<Coach> pageList = coachService.getPageList(page, keyword, orCategoryIds);
         if (pageList.isEmpty()) {
             coachItemListVo.setList(new ArrayList<>());
             coachItemListVo.setIsEnd(true);
@@ -40,7 +53,7 @@ public class CoachController {
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
 
         // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, true).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // vo就是再controller层做转换
         List<CoachItemVo> list = pageList.stream()

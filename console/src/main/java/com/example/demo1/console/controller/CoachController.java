@@ -5,7 +5,7 @@ import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
-import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
+import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
@@ -38,7 +38,7 @@ public class CoachController {
                            @RequestParam(name = "intro", required = false) String intro) {
         try {
             // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-            return coachService.edit(new AddOrUpdateCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
+            return coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -63,7 +63,7 @@ public class CoachController {
                               @RequestParam(name = "intro",required = false) String intro) {
         try {
             // trim to name;
-            return coachService.edit(new AddOrUpdateCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
+            return coachService.edit(new EditCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
         }
         catch (RuntimeException e) {
             e.printStackTrace();
@@ -78,7 +78,18 @@ public class CoachController {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
-        int coachTotal = coachService.count(keyword);
+        // 作为额外的条件
+        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
+        String orCategoryIds = "";
+        if (!orCategoryIdList.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Long aLong : orCategoryIdList) {
+                builder.append(aLong).append(",");
+            }
+            orCategoryIds = builder.toString();
+            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
+        }
+        int coachTotal = coachService.count(keyword, orCategoryIds);
         coachItemListVo.setTotal(coachTotal);
         // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
@@ -87,13 +98,13 @@ public class CoachController {
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(page, keyword);
+        List<Coach> pageList = coachService.getPageList(page, keyword, orCategoryIds);
 
         // 没有取全表，而是根据id进行in条件查询
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
 
         // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, false).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         List<CoachItemVo> list = pageList.stream()
                 .map(e -> {

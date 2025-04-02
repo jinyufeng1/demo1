@@ -2,7 +2,7 @@ package com.example.demo1.module.service;
 
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
-import com.example.demo1.module.domain.AddOrUpdateCoachDTO;
+import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +22,12 @@ public class CoachService {
     @Resource // 由于mybatis和spring的整合机制，可以和@Autowired注入互换
     private CoachMapper mapper;
 
-    public List<Coach> getPageList(int page, String keyword) {
-        return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword);
+    public List<Coach> getPageList(int page, String keyword, String orCategoryIds) {
+        return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword, orCategoryIds);
     }
 
-    public int count(String keyword) {
-        return mapper.count(keyword);
+    public int count(String keyword, String orCategoryIds) {
+        return mapper.count(keyword, orCategoryIds);
     }
 
     public Coach getById(Long id) {
@@ -51,7 +51,7 @@ public class CoachService {
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setCreateTime((int)timestamp);
         coach.setUpdateTime((int)timestamp);
-        return 0 < mapper.insert(coach);
+        return 1 == mapper.insert(coach);
     }
 
     public Boolean update(Coach coach) {
@@ -62,15 +62,15 @@ public class CoachService {
 
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setUpdateTime((int)timestamp);
-        return 0 < mapper.update(coach);
+        return 1 == mapper.update(coach);
     }
 
     /*
         合并 insert & update
      */
-    public String edit(AddOrUpdateCoachDTO dto) {
+    public String edit(EditCoachDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("CoachService类，public String edit(AddOrUpdateCoachDTO dto)方法拒绝处理，dto对象为空对象");
+            throw new RuntimeException("CoachService类，public String edit(EditCoachDTO dto)方法拒绝处理，dto对象为空对象");
         }
 
         // 分类校验
