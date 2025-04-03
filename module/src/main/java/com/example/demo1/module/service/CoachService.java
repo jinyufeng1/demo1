@@ -3,6 +3,7 @@ package com.example.demo1.module.service;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.EditCoachDTO;
+import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class CoachService {
@@ -22,12 +25,29 @@ public class CoachService {
     @Resource // 由于mybatis和spring的整合机制，可以和@Autowired注入互换
     private CoachMapper mapper;
 
-    public List<Coach> getPageList(int page, String keyword, String orCategoryIds) {
-        return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword, orCategoryIds);
+    private String getOrCategoryIdList(String keyword) {
+        String orCategoryIds = "";
+        // 作为额外的条件
+        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
+        if (!orCategoryIdList.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (Long aLong : orCategoryIdList) {
+                builder.append(aLong).append(",");
+            }
+            orCategoryIds = builder.toString();
+            // 去掉最后一个逗号
+            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
+        }
+
+        return orCategoryIds;
     }
 
-    public int count(String keyword, String orCategoryIds) {
-        return mapper.count(keyword, orCategoryIds);
+    public List<Coach> getPageList(int page, String keyword) {
+        return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword, getOrCategoryIdList(keyword));
+    }
+
+    public int count(String keyword) {
+        return mapper.count(keyword, getOrCategoryIdList(keyword));
     }
 
     public Coach getById(Long id) {

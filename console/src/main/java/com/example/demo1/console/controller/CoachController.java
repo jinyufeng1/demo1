@@ -78,18 +78,7 @@ public class CoachController {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
-        // 作为额外的条件
-        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
-        String orCategoryIds = "";
-        if (!orCategoryIdList.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (Long aLong : orCategoryIdList) {
-                builder.append(aLong).append(",");
-            }
-            orCategoryIds = builder.toString();
-            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
-        }
-        int coachTotal = coachService.count(keyword, orCategoryIds);
+        int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
         // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
@@ -98,7 +87,7 @@ public class CoachController {
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(page, keyword, orCategoryIds);
+        List<Coach> pageList = coachService.getPageList(page, keyword);
 
         // 没有取全表，而是根据id进行in条件查询
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());

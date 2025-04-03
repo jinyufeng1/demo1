@@ -28,21 +28,8 @@ public class CoachController {
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
-        // 作为额外的条件
-        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
-        String orCategoryIds = "";
-        if (!orCategoryIdList.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (Long aLong : orCategoryIdList) {
-                builder.append(aLong).append(",");
-            }
-            orCategoryIds = builder.toString();
-            // 去掉最后一个逗号
-            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
-        }
-
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(page, keyword, orCategoryIds);
+        List<Coach> pageList = coachService.getPageList(page, keyword);
         if (pageList.isEmpty()) {
             coachItemListVo.setList(new ArrayList<>());
             coachItemListVo.setIsEnd(true);
