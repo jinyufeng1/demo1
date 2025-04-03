@@ -33,13 +33,13 @@ public class TestController {
             });
         }
 
-        executorService.shutdown();
         try {
             countDownLatch.await();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+        executorService.shutdown();
 
 
         return stringBuffer.length();
@@ -63,13 +63,14 @@ public class TestController {
             });
         }
 
-        executorService.shutdown();
+
         try {
             countDownLatch.await();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+        executorService.shutdown();
 
         return stringBuilder.length();
     }
