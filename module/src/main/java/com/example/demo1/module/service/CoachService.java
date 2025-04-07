@@ -3,7 +3,6 @@ package com.example.demo1.module.service;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.EditCoachDTO;
-import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,19 +23,20 @@ public class CoachService {
     @Resource // 由于mybatis和spring的整合机制，可以和@Autowired注入互换
     private CoachMapper mapper;
 
+    /**
+     * 作为额外的条件
+     *
+     * @param keyword
+     * @return
+     */
     private String getOrCategoryIdList(String keyword) {
-        String orCategoryIds = "";
-        // 作为额外的条件
-        List<Long> orCategoryIdList = categoryService.getList(keyword, null, true).stream().map(Category::getId).collect(Collectors.toList());
-        if (!orCategoryIdList.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (Long aLong : orCategoryIdList) {
-                builder.append(aLong).append(",");
-            }
-            orCategoryIds = builder.toString();
-            // 去掉最后一个逗号
-            orCategoryIds = orCategoryIds.substring(0, orCategoryIds.length() - 1);
-        }
+        StringBuilder builder = new StringBuilder();
+        categoryService.getList(keyword, null, true)
+                .forEach(e -> builder.append(e.getId()).append(","));
+
+        String orCategoryIds = builder.toString();
+        // 去掉最后一个逗号
+        orCategoryIds = "".equals(orCategoryIds) ? orCategoryIds : orCategoryIds.substring(0, orCategoryIds.length() - 1);
 
         return orCategoryIds;
     }
@@ -64,13 +63,13 @@ public class CoachService {
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
-        return 1 == mapper.delete(id, (int)timestamp);
+        return 1 == mapper.delete(id, (int) timestamp);
     }
 
     public Boolean insert(Coach coach) {
         long timestamp = System.currentTimeMillis() / 1000;
-        coach.setCreateTime((int)timestamp);
-        coach.setUpdateTime((int)timestamp);
+        coach.setCreateTime((int) timestamp);
+        coach.setUpdateTime((int) timestamp);
         return 1 == mapper.insert(coach);
     }
 
@@ -81,7 +80,7 @@ public class CoachService {
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
-        coach.setUpdateTime((int)timestamp);
+        coach.setUpdateTime((int) timestamp);
         return 1 == mapper.update(coach);
     }
 
@@ -95,7 +94,7 @@ public class CoachService {
 
         // 分类校验
         Long categoryId = dto.getCategoryId();
-        if ( null != categoryId && ObjectUtils.isEmpty( categoryService.getById(categoryId) ) ) {
+        if (null != categoryId && ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
             throw new RuntimeException("使用无效的categoryId");
         }
 
@@ -107,8 +106,7 @@ public class CoachService {
         // id校验
         if (ObjectUtils.isEmpty(coach.getId())) {
             result = insert(coach);
-        }
-        else {
+        } else {
             result = update(coach);
         }
         return result ? coach.getId().toString() : null;
@@ -125,6 +123,7 @@ public class CoachService {
 
     /**
      * 这是一个我想的万金油的做法
+     *
      * @param entity
      * @return
      */
@@ -135,7 +134,7 @@ public class CoachService {
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
-        return 0 < mapper.deleteByProperty(entity, (int)timestamp);
+        return 0 < mapper.deleteByProperty(entity, (int) timestamp);
     }
 
 }

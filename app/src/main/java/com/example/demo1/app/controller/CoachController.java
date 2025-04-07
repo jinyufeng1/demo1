@@ -1,7 +1,9 @@
 package com.example.demo1.app.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
+import com.example.demo1.module.common.WpEntity;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
@@ -26,7 +28,19 @@ public class CoachController {
     private CategoryService categoryService;
 
     @RequestMapping("/coach/list")
-    public CoachItemListVo getCoachList(@RequestParam("page") Integer page, @RequestParam(name = "keyword", required = false) String keyword) {
+    public CoachItemListVo getCoachList(@RequestParam(name = "wp", required = false) String wp,
+                                        @RequestParam(name = "keyword", required = false) String keyword) {
+
+        int page = 1;
+        if (StringUtils.hasLength(wp)) {
+            //Base64解码
+            String decode = new String(Base64.getUrlDecoder().decode(wp));
+            //获取json转实体
+            WpEntity wpEntity = JSON.parseObject(decode, WpEntity.class);
+            page = wpEntity.getPage();
+            keyword = wpEntity.getKeyword();
+        }
+
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
         List<Coach> pageList = coachService.getPageList(page, keyword);
@@ -65,6 +79,15 @@ public class CoachController {
         }
 
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
+
+        // 构建下一页需要的wp
+        WpEntity wpEntity = new WpEntity(++page, keyword);
+        // 实体转json
+        String jsonString = JSON.toJSONString(wpEntity);
+        // Base64编码
+        String wpString = Base64.getEncoder().encodeToString(jsonString.getBytes());
+        coachItemListVo.setWp(wpString);
+
         return coachItemListVo;
     }
 

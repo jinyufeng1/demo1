@@ -8,4 +8,5 @@ import java.util.List;
 public class CoachItemListVo {
     private List<CoachItemVo> list;
     private Boolean isEnd;
+    private String wp;
 }
