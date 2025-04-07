@@ -1,11 +1,11 @@
-package com.example.demo1.module.common;
+package com.example.demo1.app.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class WpEntity {
+public class WpVo {
     private Integer page;
     private String keyword;
 }

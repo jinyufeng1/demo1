@@ -3,7 +3,7 @@ package com.example.demo1.app.controller;
 import com.alibaba.fastjson.JSON;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
-import com.example.demo1.module.common.WpEntity;
+import com.example.demo1.app.domain.WpVo;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
@@ -36,9 +36,9 @@ public class CoachController {
             //Base64解码
             String decode = new String(Base64.getUrlDecoder().decode(wp));
             //获取json转实体
-            WpEntity wpEntity = JSON.parseObject(decode, WpEntity.class);
-            page = wpEntity.getPage();
-            keyword = wpEntity.getKeyword();
+            WpVo wpVo = JSON.parseObject(decode, WpVo.class);
+            page = wpVo.getPage();
+            keyword = wpVo.getKeyword();
         }
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
@@ -81,11 +81,11 @@ public class CoachController {
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
 
         // 构建下一页需要的wp
-        WpEntity wpEntity = new WpEntity(++page, keyword);
+        WpVo wpVo = new WpVo(++page, keyword);
         // 实体转json
-        String jsonString = JSON.toJSONString(wpEntity);
+        String jsonString = JSON.toJSONString(wpVo);
         // Base64编码
-        String wpString = Base64.getEncoder().encodeToString(jsonString.getBytes());
+        String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         coachItemListVo.setWp(wpString);
 
         return coachItemListVo;
