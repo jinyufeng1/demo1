@@ -10,6 +10,7 @@ import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ public class CoachController {
 
     //新增教练信息
     @RequestMapping("/coach/add")
-    public String addCoach(@RequestParam(name = "pics",required = false) String pics,
+    public String addCoach(@RequestParam(name = "pics", required = false) String pics,
                            @RequestParam("name") String name,
                            @RequestParam("categoryId") Long categoryId,
                            @RequestParam(name = "speciality", required = false) String speciality,
@@ -39,8 +40,7 @@ public class CoachController {
         try {
             // trim to name; Due to required=false in springmvc,name can't be null at all!!!
             return coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             // 返回异常信息
             return "add接口捕获异常信息：" + e.getMessage();
@@ -57,15 +57,14 @@ public class CoachController {
     @RequestMapping("/coach/update")
     public String updateCoach(@RequestParam(name = "id") Long id,
                               @RequestParam(name = "categoryId", required = false) Long categoryId,
-                              @RequestParam(name = "pics",required = false) String pics,
-                              @RequestParam(name = "name",required = false) String name,
-                              @RequestParam(name = "speciality",required = false) String speciality,
-                              @RequestParam(name = "intro",required = false) String intro) {
+                              @RequestParam(name = "pics", required = false) String pics,
+                              @RequestParam(name = "name", required = false) String name,
+                              @RequestParam(name = "speciality", required = false) String speciality,
+                              @RequestParam(name = "intro", required = false) String intro) {
         try {
             // trim to name;
             return coachService.edit(new EditCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             // 返回异常信息
             return "upate接口捕获异常信息：" + e.getMessage();
@@ -95,30 +94,52 @@ public class CoachController {
         // 获取分类映射列表
         Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, false).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
-        List<CoachItemVo> list = pageList.stream()
+        // vo就是再controller层做转换
+        List<CoachItemVo> list = new ArrayList<>();
+        for (Coach coach : pageList) {
+            String category = categoryMap.get(coach.getCategoryId());
+            if (null == category) {
+                continue;
+            }
+
+            CoachItemVo coachItemVo = new CoachItemVo();
+            coachItemVo.setId(coach.getId());
+            coachItemVo.setName(coach.getName());
+            String pics = coach.getPics();
+            //不需要判断是否包含split参数，没有就不切
+            String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+            coachItemVo.setPic(pic);
+            coachItemVo.setSpeciality(coach.getSpeciality());
+            coachItemVo.setCategory(category);
+            list.add(coachItemVo);
+        }
+        coachItemListVo.setList(list);
+
+        return coachItemListVo;
+    }
+
+    @RequestMapping("/coach/list2")
+    public CoachItemListVo getCoachList2(@RequestParam("page") Integer page,
+                                         @RequestParam(name = "keyword", required = false) String keyword) {
+        CoachItemListVo coachItemListVo = new CoachItemListVo();
+        coachItemListVo.setPageSize(Constant.PAGE_SIZE);
+
+        int coachTotal = coachService.count(keyword);
+        coachItemListVo.setTotal(coachTotal);
+        // 总是都为0就不用查了，节约数据库访问
+        if (0 == coachTotal) {
+            coachItemListVo.setList(new ArrayList<>());
+            return coachItemListVo;
+        }
+
+        List<CoachItemVo> list = coachService.getPageListLinkTable(page, keyword)
+                .stream()
                 .map(e -> {
-                    // vo就是再controller层做转换
                     CoachItemVo coachItemVo = new CoachItemVo();
-                    coachItemVo.setId(e.getId());
-                    coachItemVo.setName(e.getName());
-                    String pics = e.getPics();
-                    //不需要判断是否包含split参数，没有就不切
-                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(pic);
-                    coachItemVo.setSpeciality(e.getSpeciality());
-                    coachItemVo.setCategory(categoryMap.get(e.getCategoryId()));
+                    BeanUtils.copyProperties(e, coachItemVo);
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);
-
-        // 判断是否有分类数据取空的情况
-        if (list.stream().anyMatch(e -> null == e.getCategory())) {
-            // 过滤掉category为空的实体元素
-            coachItemListVo.setList(list.stream().filter(e -> null != e.getCategory()).collect(Collectors.toList()));
-            // 重新设置total
-            coachItemListVo.setTotal(coachItemListVo.getTotal() - (list.size() - coachItemListVo.getList().size()));
-        }
-
         return coachItemListVo;
     }
 

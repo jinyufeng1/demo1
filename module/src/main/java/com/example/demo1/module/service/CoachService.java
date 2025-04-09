@@ -2,6 +2,7 @@ package com.example.demo1.module.service;
 
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
+import com.example.demo1.module.domain.CoachItemDTO;
 import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.mapper.CoachMapper;
@@ -43,6 +44,10 @@ public class CoachService {
 
     public List<Coach> getPageList(int page, String keyword) {
         return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword, getOrCategoryIdList(keyword));
+    }
+
+    public List<CoachItemDTO> getPageListLinkTable(int page, String keyword) {
+        return mapper.getPageListLinkTable((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword);
     }
 
     public int count(String keyword) {

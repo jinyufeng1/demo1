@@ -8,6 +8,7 @@ import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -57,27 +58,25 @@ public class CoachController {
         Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, true).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // vo就是再controller层做转换
-        List<CoachItemVo> list = pageList.stream()
-                .map(e -> {
-                    CoachItemVo coachItemVo = new CoachItemVo();
-                    coachItemVo.setId(e.getId());
-                    coachItemVo.setName(e.getName());
-                    String pics = e.getPics();
-                    //不需要判断是否包含split参数，没有就不切
-                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(pic);
-                    coachItemVo.setSpeciality(e.getSpeciality());
-                    coachItemVo.setCategory(categoryMap.get(e.getCategoryId()));
-                    return coachItemVo;
-                }).collect(Collectors.toList());
-        coachItemListVo.setList(list);
+        List<CoachItemVo> list = new ArrayList<>();
+        for (Coach coach : pageList) {
+            String category = categoryMap.get(coach.getCategoryId());
+            if (null == category) {
+                continue;
+            }
 
-        // 判断是否有分类数据取空的情况
-        if (list.stream().anyMatch(e -> null == e.getCategory())) {
-            // 过滤掉category为空的实体元素
-            coachItemListVo.setList(list.stream().filter(e -> null != e.getCategory()).collect(Collectors.toList()));
+            CoachItemVo coachItemVo = new CoachItemVo();
+            coachItemVo.setId(coach.getId());
+            coachItemVo.setName(coach.getName());
+            String pics = coach.getPics();
+            //不需要判断是否包含split参数，没有就不切
+            String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+            coachItemVo.setPic(pic);
+            coachItemVo.setSpeciality(coach.getSpeciality());
+            coachItemVo.setCategory(category);
+            list.add(coachItemVo);
         }
-
+        coachItemListVo.setList(list);
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
 
         // 构建下一页需要的wp
@@ -88,6 +87,40 @@ public class CoachController {
         String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         coachItemListVo.setWp(wpString);
 
+        return coachItemListVo;
+    }
+
+    @RequestMapping("/coach/list2")
+    public CoachItemListVo getCoachList2(@RequestParam(name = "wp", required = false) String wp,
+                                         @RequestParam(name = "keyword", required = false) String keyword) {
+        int page = 1;
+        if (StringUtils.hasLength(wp)) {
+            //Base64解码
+            String decode = new String(Base64.getUrlDecoder().decode(wp));
+            //获取json转实体
+            WpVo wpVo = JSON.parseObject(decode, WpVo.class);
+            page = wpVo.getPage();
+            keyword = wpVo.getKeyword();
+        }
+
+        CoachItemListVo coachItemListVo = new CoachItemListVo();
+        List<CoachItemVo> list = coachService.getPageListLinkTable(page, keyword)
+                .stream()
+                .map(e -> {
+                    CoachItemVo coachItemVo = new CoachItemVo();
+                    BeanUtils.copyProperties(e, coachItemVo);
+                    return coachItemVo;
+                }).collect(Collectors.toList());
+        coachItemListVo.setList(list);
+        coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
+
+        // 构建下一页需要的wp
+        WpVo wpVo = new WpVo(++page, keyword);
+        // 实体转json
+        String jsonString = JSON.toJSONString(wpVo);
+        // Base64编码
+        String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
+        coachItemListVo.setWp(wpString);
         return coachItemListVo;
     }
 

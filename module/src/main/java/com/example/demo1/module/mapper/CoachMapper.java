@@ -1,5 +1,6 @@
 package com.example.demo1.module.mapper;
 
+import com.example.demo1.module.domain.CoachItemDTO;
 import com.example.demo1.module.entity.Coach;
 import org.apache.ibatis.annotations.*;
 
@@ -22,6 +23,10 @@ public interface CoachMapper {
     List<Coach> getPageList(@Param("index") int index,
                             @Param("pageSize") int pageSize,
                             @Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
+
+    List<CoachItemDTO> getPageListLinkTable(@Param("index") int index,
+                                            @Param("pageSize") int pageSize,
+                                            @Param("keyword") String keyword);
 
 //    @Select("select count(*) from coach WHERE is_deleted = 0")
     int count(@Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
