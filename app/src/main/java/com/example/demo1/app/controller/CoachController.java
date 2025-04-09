@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.app.domain.WpVo;
+import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
@@ -32,19 +33,17 @@ public class CoachController {
     public CoachItemListVo getCoachList(@RequestParam(name = "wp", required = false) String wp,
                                         @RequestParam(name = "keyword", required = false) String keyword) {
 
-        int page = 1;
+        WpVo wpVo = null;
         if (StringUtils.hasLength(wp)) {
             //Base64解码
             String decode = new String(Base64.getUrlDecoder().decode(wp));
             //获取json转实体
-            WpVo wpVo = JSON.parseObject(decode, WpVo.class);
-            page = wpVo.getPage();
-            keyword = wpVo.getKeyword();
+            wpVo = JSON.parseObject(decode, WpVo.class);
         }
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(page, keyword);
+        List<Coach> pageList = coachService.getPageList(null == wpVo ? 1 : wpVo.getPage(), null == wpVo ? keyword : wpVo.getKeyword());
         if (pageList.isEmpty()) {
             coachItemListVo.setList(new ArrayList<>());
             coachItemListVo.setIsEnd(true);
@@ -80,7 +79,15 @@ public class CoachController {
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
 
         // 构建下一页需要的wp
-        WpVo wpVo = new WpVo(++page, keyword);
+        if (null == wpVo) {
+            //记录第一次进入接口的时间
+            long timestamp = System.currentTimeMillis() / 1000;
+            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp((int)timestamp));
+        }
+        else {
+            wpVo.setPage(wpVo.getPage() + 1);
+        }
+
         // 实体转json
         String jsonString = JSON.toJSONString(wpVo);
         // Base64编码
@@ -93,18 +100,16 @@ public class CoachController {
     @RequestMapping("/coach/list2")
     public CoachItemListVo getCoachList2(@RequestParam(name = "wp", required = false) String wp,
                                          @RequestParam(name = "keyword", required = false) String keyword) {
-        int page = 1;
+        WpVo wpVo = null;
         if (StringUtils.hasLength(wp)) {
             //Base64解码
             String decode = new String(Base64.getUrlDecoder().decode(wp));
             //获取json转实体
-            WpVo wpVo = JSON.parseObject(decode, WpVo.class);
-            page = wpVo.getPage();
-            keyword = wpVo.getKeyword();
+            wpVo = JSON.parseObject(decode, WpVo.class);
         }
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
-        List<CoachItemVo> list = coachService.getPageListLinkTable(page, keyword)
+        List<CoachItemVo> list = coachService.getPageListLinkTable(null == wpVo ? 1 : wpVo.getPage(), null == wpVo ? keyword : wpVo.getKeyword())
                 .stream()
                 .map(e -> {
                     CoachItemVo coachItemVo = new CoachItemVo();
@@ -115,12 +120,21 @@ public class CoachController {
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
 
         // 构建下一页需要的wp
-        WpVo wpVo = new WpVo(++page, keyword);
+        if (null == wpVo) {
+            //记录第一次进入接口的时间
+            long timestamp = System.currentTimeMillis() / 1000;
+            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp((int)timestamp));
+        }
+        else {
+            wpVo.setPage(wpVo.getPage() + 1);
+        }
+
         // 实体转json
         String jsonString = JSON.toJSONString(wpVo);
         // Base64编码
         String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         coachItemListVo.setWp(wpString);
+
         return coachItemListVo;
     }
 

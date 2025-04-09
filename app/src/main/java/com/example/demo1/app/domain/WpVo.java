@@ -8,4 +8,5 @@ import lombok.Data;
 public class WpVo {
     private Integer page;
     private String keyword;
+    private String firstTime;
 }
