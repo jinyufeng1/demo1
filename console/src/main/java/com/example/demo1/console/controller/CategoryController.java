@@ -2,6 +2,7 @@ package com.example.demo1.console.controller;
 
 import com.example.demo1.console.domain.CategoryItemListVo;
 import com.example.demo1.console.domain.CategoryItemVo;
+import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.EditCategoryDTO;
 import com.example.demo1.module.entity.Category;
@@ -51,6 +52,27 @@ public class CategoryController {
         return categoryService.edit(new EditCategoryDTO(id, name, icon, parentId));
     }
 
+    public CategoryItemVo shift(Category category, Map<Long, List<Category>> map) {
+        CategoryItemVo categoryItemVo = new CategoryItemVo();
+        categoryItemVo.setId(category.getId());
+        categoryItemVo.setName(category.getName());
+        categoryItemVo.setIcon(category.getPic());
+        categoryItemVo.setCreateTime(CustomUtils.transformTimestamp(category.getCreateTime() * 1000L, Constant.DATE_PATTERN_1));
+        categoryItemVo.setUpdateTime(CustomUtils.transformTimestamp(category.getUpdateTime() * 1000L, Constant.DATE_PATTERN_1));
+        List<Category> children = map.get(category.getId());
+        if (CollectionUtils.isEmpty(children)) {
+            return categoryItemVo;
+        }
+
+        //添加子节点
+        categoryItemVo.setChildren(new ArrayList<>());
+        for (Category child : children) {
+            categoryItemVo.getChildren().add(shift(child, map));
+        }
+
+        return categoryItemVo;
+    }
+
     @RequestMapping("/category/list")
     public CategoryItemListVo getCategoryList() {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
@@ -62,14 +84,13 @@ public class CategoryController {
 
         // 一级分类
         List<Category> firstList = new ArrayList<>();
-        //分类所属关系
+        //分类所属关系 所有子节点
         Map<Long, List<Category>> map = new HashMap<>();
         for (Category category : list) {
             Long parentId = category.getParentId();
             if (ObjectUtils.isEmpty(parentId)) {
                 firstList.add(category);
-            }
-            else {
+            } else {
                 List<Category> categories = map.computeIfAbsent(parentId, e -> new ArrayList<>());
                 categories.add(category);
             }
@@ -80,30 +101,7 @@ public class CategoryController {
         }
 
         //构建层级列表
-        List<CategoryItemVo> retList = firstList.stream().map(e -> {
-            CategoryItemVo categoryItemVo = new CategoryItemVo();
-            categoryItemVo.setId(e.getId());
-            categoryItemVo.setName(e.getName());
-            categoryItemVo.setIcon(e.getPic());
-            categoryItemVo.setCreateTime(CustomUtils.transformTimestamp(e.getCreateTime()));
-            categoryItemVo.setUpdateTime(CustomUtils.transformTimestamp(e.getUpdateTime()));
-            List<Category> categories = map.get(e.getId());
-            if (!CollectionUtils.isEmpty(categories)) {
-                categoryItemVo.setChildren(new ArrayList<>());
-
-                for (Category category : categories) {
-                    CategoryItemVo child = new CategoryItemVo();
-                    child.setId(category.getId());
-                    child.setName(category.getName());
-                    child.setIcon(category.getPic());
-                    child.setCreateTime(CustomUtils.transformTimestamp(category.getCreateTime()));
-                    child.setUpdateTime(CustomUtils.transformTimestamp(category.getUpdateTime()));
-                    categoryItemVo.getChildren().add(child);
-                }
-            }
-
-            return categoryItemVo;
-        }).collect(Collectors.toList());
+        List<CategoryItemVo> retList = firstList.stream().map(e -> shift(e, map)).collect(Collectors.toList());
 
         categoryItemListVo.setList(retList);
         return categoryItemListVo;

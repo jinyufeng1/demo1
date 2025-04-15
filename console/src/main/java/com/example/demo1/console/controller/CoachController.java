@@ -92,7 +92,7 @@ public class CoachController {
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
 
         // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, false).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // vo就是再controller层做转换
         List<CoachItemVo> list = new ArrayList<>();
@@ -168,8 +168,8 @@ public class CoachController {
 
         coachDetailsVo.setCategory(category.getName());
         coachDetailsVo.setIcon(category.getPic());
-        coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime()));
-        coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime()));
+        coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime() * 1000L, Constant.DATE_PATTERN_1));
+        coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime() * 1000L, Constant.DATE_PATTERN_1));
         return coachDetailsVo;
     }
 }

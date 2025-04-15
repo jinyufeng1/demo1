@@ -1,20 +1,21 @@
 package com.example.demo1.app.controller;
 
-import com.example.demo1.app.domain.CategoryItemListVo;
-import com.example.demo1.app.domain.CategoryItemVo;
+import com.alibaba.fastjson.JSON;
+import com.example.demo1.app.domain.*;
+import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.service.CategoryService;
+import com.example.demo1.module.service.CoachService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,32 +23,25 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private CoachService coachService;
+
     @RequestMapping("/category/list")
     public CategoryItemListVo getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
-        List<Category> list = categoryService.getList(keyword, null, null);
-        if (list.isEmpty()) {
-            categoryItemListVo.setList(new ArrayList<>());
-            return categoryItemListVo;
-        }
-
-        // 一级分类
-        List<Category> firstList = new ArrayList<>();
-        //分类所属关系
-        Map<Long, List<Category>> map = new HashMap<>();
-        for (Category category : list) {
-            Long parentId = category.getParentId();
-            if (ObjectUtils.isEmpty(parentId)) {
-                firstList.add(category);
-            }
-            else {
-                List<Category> categories = map.computeIfAbsent(parentId, e -> new ArrayList<>());
-                categories.add(category);
-            }
-        }
+        List<Category> firstList = categoryService.getList2(keyword, null, true); // 一级分类
 
         if (firstList.isEmpty()) {
             throw new RuntimeException("分类信息异常，无一级分类信息！");
+        }
+        List<Long> parentIds = firstList.stream().map(Category::getId).collect(Collectors.toList());
+
+        List<Category> nextList = categoryService.getList2(null, parentIds, null); // 二级分类
+        //分类所属关系
+        Map<Long, List<Category>> map = new HashMap<>();
+        for (Category category : nextList) {
+            List<Category> categories = map.computeIfAbsent(category.getParentId(), e -> new ArrayList<>());
+            categories.add(category);
         }
 
         //构建层级列表
@@ -74,5 +68,100 @@ public class CategoryController {
 
         categoryItemListVo.setList(retList);
         return categoryItemListVo;
+    }
+
+    @RequestMapping("/category/nlist")
+    public LevelThreeAboveVo getLevelThreeAboveList(@RequestParam(name = "wp", required = false) String wp,
+                                                    @RequestParam(name = "parentId", required = false) Long parentId) {
+        WpVo wpVo = null;
+        if (StringUtils.hasLength(wp)) {
+            //Base64解码
+            String decode = new String(Base64.getUrlDecoder().decode(wp));
+            //获取json转实体
+            wpVo = JSON.parseObject(decode, WpVo.class);
+        }
+
+        LevelThreeAboveVo levelThreeAboveVo = new LevelThreeAboveVo();
+        // 第一次进入 提供类目列表和推荐列表
+        if (ObjectUtils.isEmpty(wpVo)) {
+            // 获取下级类目列表
+            List<Category> list = categoryService.getList2(null , Collections.singletonList(parentId), null);
+            //如果没有后面都不用做了
+            if (list.isEmpty()) {
+                levelThreeAboveVo.setIsEnd(true);
+                return levelThreeAboveVo;
+            }
+
+            List<CategoryItemVo> categoryItems = list.stream().map(e -> {
+                CategoryItemVo categoryItemVo = new CategoryItemVo();
+                categoryItemVo.setId(e.getId());
+                categoryItemVo.setName(e.getName());
+                categoryItemVo.setIcon(e.getPic());
+                return categoryItemVo;
+            }).collect(Collectors.toList());
+            levelThreeAboveVo.setCategoryItems(categoryItems);
+
+            // 向下递归，收集叶子节点类目id
+            List<Long> leafCategoryIds = new ArrayList<>();
+            categoryService.collectLeafItemIds(parentId, leafCategoryIds);
+
+            // 获取推荐列表
+            List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(1, leafCategoryIds)
+                    .stream().map(e -> {
+                CoachItemVo coachItemVo = new CoachItemVo();
+                BeanUtils.copyProperties(e, coachItemVo);
+                String pics = e.getPics();
+                //不需要判断是否包含split参数，没有就不切
+                String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                coachItemVo.setPic(ImageVo.transformObj(pic));
+                return coachItemVo;
+            }).collect(Collectors.toList());
+
+            if (coachItemVos.isEmpty()) {
+                levelThreeAboveVo.setIsEnd(true);
+                return levelThreeAboveVo;
+            }
+
+            levelThreeAboveVo.setCoachItems(coachItemVos);
+            levelThreeAboveVo.setIsEnd(coachItemVos.size() < Constant.PAGE_SIZE);
+            wpVo = new WpVo(2, null, null, leafCategoryIds);            // 构建下一页需要的wp
+        }
+        // 第n次进入 只提供推荐列表
+        else {
+
+            if (wpVo.getLeafCategoryIds().isEmpty()) {
+                levelThreeAboveVo.setIsEnd(true);
+                return levelThreeAboveVo;
+            }
+
+            // 获取推荐列表
+            List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(wpVo.getPage(), wpVo.getLeafCategoryIds())
+                    .stream().map(e -> {
+                CoachItemVo coachItemVo = new CoachItemVo();
+                BeanUtils.copyProperties(e, coachItemVo);
+                String pics = e.getPics();
+                //不需要判断是否包含split参数，没有就不切
+                String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                coachItemVo.setPic(ImageVo.transformObj(pic));
+                return coachItemVo;
+            }).collect(Collectors.toList());
+
+            if (coachItemVos.isEmpty()) {
+                levelThreeAboveVo.setIsEnd(true);
+                return levelThreeAboveVo;
+            }
+
+            levelThreeAboveVo.setCoachItems(coachItemVos);
+            levelThreeAboveVo.setIsEnd(coachItemVos.size() < Constant.PAGE_SIZE);
+            wpVo.setPage(wpVo.getPage() + 1);             // 更新下一页需要的wp
+        }
+
+        // 实体转json
+        String jsonString = JSON.toJSONString(wpVo);
+        // Base64编码
+        String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
+        levelThreeAboveVo.setWp(wpString);
+
+        return levelThreeAboveVo;
     }
 }

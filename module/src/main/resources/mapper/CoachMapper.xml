@@ -32,6 +32,20 @@
         limit #{index}, #{pageSize}
     </select>
 
+    <select id="getPageListLinkTable2" resultType="com.example.demo1.module.domain.CoachItemDTO">
+        select coach.id, coach.pics, coach.`name`, coach.speciality, category.name as category
+        from coach inner join category
+        where coach.is_deleted = 0 and category.is_deleted = 0 and coach.category_id = category.id
+        <if test="leafCategoryIds != null and leafCategoryIds.size > 0">
+            and coach.category_id in
+            <foreach item="id" index="index" collection="leafCategoryIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        order by coach.id
+        limit #{index}, #{pageSize}
+    </select>
+
     <select id="count" resultType="java.lang.Integer">
         select count(*) from coach
         where is_deleted = 0

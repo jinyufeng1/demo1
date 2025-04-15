@@ -46,6 +46,10 @@ public class CoachService {
         return mapper.getPageList((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword, getOrCategoryIdList(keyword));
     }
 
+    public List<CoachItemDTO> getPageListLinkTable2(int page, List<Long> leafCategoryIds) {
+        return mapper.getPageListLinkTable2((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, leafCategoryIds);
+    }
+
     public List<CoachItemDTO> getPageListLinkTable(int page, String keyword) {
         return mapper.getPageListLinkTable((page - 1) * Constant.PAGE_SIZE, Constant.PAGE_SIZE, keyword);
     }

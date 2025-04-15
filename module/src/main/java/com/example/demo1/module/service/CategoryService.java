@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -65,6 +66,10 @@ public class CategoryService {
         return mapper.getList(keyword, ids, limit);
     }
 
+    public List<Category> getList2(String keyword, List<Long> parentIds, Boolean onlyFirst) {
+        return mapper.getList2(keyword, parentIds, onlyFirst);
+    }
+
     /*
     合并 insert & update
  */
@@ -88,7 +93,6 @@ public class CategoryService {
         // copy
         Category category = new Category();
         BeanUtils.copyProperties(dto, category);
-
         Boolean result;
         // id校验
         if (ObjectUtils.isEmpty(category.getId())) {
@@ -107,5 +111,19 @@ public class CategoryService {
 
         long timestamp = System.currentTimeMillis() / 1000;
         return 0 < mapper.deleteHierarchy(id, (int)timestamp);
+    }
+
+    public void collectLeafItemIds(Long parentId, List<Long> leafItemIds) {
+        List<Category> children = getList2(null , Collections.singletonList(parentId), null);
+
+        // 判断是否为叶子节点
+        if (0 != children.size()) {
+            for (Category child : children) {
+                collectLeafItemIds(child.getId(), leafItemIds);
+            }
+        }
+        else {
+            leafItemIds.add(parentId);
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.example.demo1.app.controller;
 import com.alibaba.fastjson.JSON;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
-import com.example.demo1.app.domain.WpVo;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
@@ -54,7 +53,7 @@ public class CoachController {
         Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
 
         // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, true).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // vo就是再controller层做转换
         List<CoachItemVo> list = new ArrayList<>();
@@ -65,14 +64,12 @@ public class CoachController {
             }
 
             CoachItemVo coachItemVo = new CoachItemVo();
-            coachItemVo.setId(coach.getId());
-            coachItemVo.setName(coach.getName());
+            coachItemVo.setCategory(category);
+            BeanUtils.copyProperties(coach, coachItemVo);
             String pics = coach.getPics();
             //不需要判断是否包含split参数，没有就不切
             String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-            coachItemVo.setPic(pic);
-            coachItemVo.setSpeciality(coach.getSpeciality());
-            coachItemVo.setCategory(category);
+            coachItemVo.setPic(ImageVo.transformObj(pic));
             list.add(coachItemVo);
         }
         coachItemListVo.setList(list);
@@ -81,8 +78,7 @@ public class CoachController {
         // 构建下一页需要的wp
         if (null == wpVo) {
             //记录第一次进入接口的时间
-            long timestamp = System.currentTimeMillis() / 1000;
-            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp((int)timestamp));
+            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp(System.currentTimeMillis(), Constant.DATE_PATTERN_1), null);
         }
         else {
             wpVo.setPage(wpVo.getPage() + 1);
@@ -114,6 +110,10 @@ public class CoachController {
                 .map(e -> {
                     CoachItemVo coachItemVo = new CoachItemVo();
                     BeanUtils.copyProperties(e, coachItemVo);
+                    String pics = e.getPics();
+                    //不需要判断是否包含split参数，没有就不切
+                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                    coachItemVo.setPic(ImageVo.transformObj(pic));
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);
@@ -122,8 +122,7 @@ public class CoachController {
         // 构建下一页需要的wp
         if (null == wpVo) {
             //记录第一次进入接口的时间
-            long timestamp = System.currentTimeMillis() / 1000;
-            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp((int)timestamp));
+            wpVo = new WpVo(2, keyword, CustomUtils.transformTimestamp(System.currentTimeMillis(), Constant.DATE_PATTERN_1), null);
         }
         else {
             wpVo.setPage(wpVo.getPage() + 1);

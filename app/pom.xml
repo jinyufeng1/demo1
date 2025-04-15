@@ -24,7 +24,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--依赖子项目-->
+		<!--依赖项目-->
 		<dependency>
 			<groupId>com.example.demo1</groupId>
 			<artifactId>module</artifactId>

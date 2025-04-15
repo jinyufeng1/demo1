@@ -9,7 +9,7 @@ public class CoachItemVo {
     private Long id;
 
 //    封面
-    private String pic;
+    private ImageVo pic;
 
 //    名称
     private String name;

@@ -28,7 +28,12 @@ public interface CoachMapper {
                                             @Param("pageSize") int pageSize,
                                             @Param("keyword") String keyword);
 
-//    @Select("select count(*) from coach WHERE is_deleted = 0")
+    List<CoachItemDTO> getPageListLinkTable2(@Param("index") int index,
+                                      @Param("pageSize") int pageSize,
+                                      @Param("leafCategoryIds") List<Long> leafCategoryIds);
+
+
+    //    @Select("select count(*) from coach WHERE is_deleted = 0")
     int count(@Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
 
 //    **************************五大基础方法**************************
