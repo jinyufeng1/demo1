@@ -57,7 +57,7 @@
 		</if>
 	</select>
 
-	<select id="getList2" resultType="com.example.demo1.module.entity.Category">
+	<select id="getListByParent" resultType="com.example.demo1.module.entity.Category">
 		select * from category
 		where is_deleted = 0
 		<if test="keyword != null">
@@ -69,9 +69,14 @@
 				#{id}
 			</foreach>
 		</if>
-		<if test="onlyFirst == true">
-			and parent_id is null
-		</if>
 		order by id
+	</select>
+
+	<select id="getFirstList" resultType="com.example.demo1.module.entity.Category">
+		select * from category
+		where is_deleted = 0 and parent_id is null
+		<if test="keyword != null">
+			and name like CONCAT('%', #{keyword}, '%')
+		</if>
 	</select>
 </mapper>

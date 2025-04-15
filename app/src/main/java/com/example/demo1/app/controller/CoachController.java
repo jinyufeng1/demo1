@@ -1,7 +1,10 @@
 package com.example.demo1.app.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.example.demo1.app.domain.*;
+import com.example.demo1.app.domain.CoachDetailsVo;
+import com.example.demo1.app.domain.CoachItemListVo;
+import com.example.demo1.app.domain.CoachItemVo;
+import com.example.demo1.app.domain.WpVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.entity.Category;
@@ -69,7 +72,7 @@ public class CoachController {
             String pics = coach.getPics();
             //不需要判断是否包含split参数，没有就不切
             String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-            coachItemVo.setPic(ImageVo.transformObj(pic));
+            coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
             list.add(coachItemVo);
         }
         coachItemListVo.setList(list);
@@ -113,7 +116,7 @@ public class CoachController {
                     String pics = e.getPics();
                     //不需要判断是否包含split参数，没有就不切
                     String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(ImageVo.transformObj(pic));
+                    coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);

@@ -1,6 +1,7 @@
 package com.example.demo1.app.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.example.demo1.app.common.CustomUtils;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.entity.Category;
@@ -29,14 +30,14 @@ public class CategoryController {
     @RequestMapping("/category/list")
     public CategoryItemListVo getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
-        List<Category> firstList = categoryService.getList2(keyword, null, true); // 一级分类
+        List<Category> firstList = categoryService.getFirstList(keyword); // 一级分类
 
         if (firstList.isEmpty()) {
             throw new RuntimeException("分类信息异常，无一级分类信息！");
         }
         List<Long> parentIds = firstList.stream().map(Category::getId).collect(Collectors.toList());
 
-        List<Category> nextList = categoryService.getList2(null, parentIds, null); // 二级分类
+        List<Category> nextList = categoryService.getListByParent(null, parentIds); // 二级分类
         //分类所属关系
         Map<Long, List<Category>> map = new HashMap<>();
         for (Category category : nextList) {
@@ -70,6 +71,20 @@ public class CategoryController {
         return categoryItemListVo;
     }
 
+
+    private List<CoachItemVo> getCoachItemVos(int page, List<Long> leafCategoryIds) {
+        return coachService.getPageListLinkTable2(page, leafCategoryIds)
+                .stream().map(e -> {
+                    CoachItemVo coachItemVo = new CoachItemVo();
+                    BeanUtils.copyProperties(e, coachItemVo);
+                    String pics = e.getPics();
+                    //不需要判断是否包含split参数，没有就不切
+                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                    coachItemVo.setPic(CustomUtils.transformObj(pic));
+                    return coachItemVo;
+                }).collect(Collectors.toList());
+    }
+
     @RequestMapping("/category/nlist")
     public LevelThreeAboveVo getLevelThreeAboveList(@RequestParam(name = "wp", required = false) String wp,
                                                     @RequestParam(name = "parentId", required = false) Long parentId) {
@@ -85,7 +100,7 @@ public class CategoryController {
         // 第一次进入 提供类目列表和推荐列表
         if (ObjectUtils.isEmpty(wpVo)) {
             // 获取下级类目列表
-            List<Category> list = categoryService.getList2(null , Collections.singletonList(parentId), null);
+            List<Category> list = categoryService.getListByParent(null , Collections.singletonList(parentId));
             //如果没有后面都不用做了
             if (list.isEmpty()) {
                 levelThreeAboveVo.setIsEnd(true);
@@ -106,17 +121,7 @@ public class CategoryController {
             categoryService.collectLeafItemIds(parentId, leafCategoryIds);
 
             // 获取推荐列表
-            List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(1, leafCategoryIds)
-                    .stream().map(e -> {
-                CoachItemVo coachItemVo = new CoachItemVo();
-                BeanUtils.copyProperties(e, coachItemVo);
-                String pics = e.getPics();
-                //不需要判断是否包含split参数，没有就不切
-                String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                coachItemVo.setPic(ImageVo.transformObj(pic));
-                return coachItemVo;
-            }).collect(Collectors.toList());
-
+            List<CoachItemVo> coachItemVos = getCoachItemVos(1, leafCategoryIds);
             if (coachItemVos.isEmpty()) {
                 levelThreeAboveVo.setIsEnd(true);
                 return levelThreeAboveVo;
@@ -135,17 +140,7 @@ public class CategoryController {
             }
 
             // 获取推荐列表
-            List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(wpVo.getPage(), wpVo.getLeafCategoryIds())
-                    .stream().map(e -> {
-                CoachItemVo coachItemVo = new CoachItemVo();
-                BeanUtils.copyProperties(e, coachItemVo);
-                String pics = e.getPics();
-                //不需要判断是否包含split参数，没有就不切
-                String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                coachItemVo.setPic(ImageVo.transformObj(pic));
-                return coachItemVo;
-            }).collect(Collectors.toList());
-
+            List<CoachItemVo> coachItemVos = getCoachItemVos(wpVo.getPage(), wpVo.getLeafCategoryIds());
             if (coachItemVos.isEmpty()) {
                 levelThreeAboveVo.setIsEnd(true);
                 return levelThreeAboveVo;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -73,9 +74,8 @@ public class FileUploadController {
         }
 
         String filePrefix; // 文件路径名前缀
-        long currentTimeMillis = System.currentTimeMillis();
-        Date date = new Date(currentTimeMillis);
-        String fileMiddle = new SimpleDateFormat("yyyyMM/dd/").format(date) + currentTimeMillis; // 文件路径名中部
+        Date date = new Date(System.currentTimeMillis());
+        String fileMiddle = new SimpleDateFormat("yyyyMM/dd/").format(date) + UUID.randomUUID(); // 文件路径名中部
 
         // 判断文件类型
         if (contentType.contains("image")) {

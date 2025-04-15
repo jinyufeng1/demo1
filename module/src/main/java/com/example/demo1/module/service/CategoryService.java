@@ -66,8 +66,12 @@ public class CategoryService {
         return mapper.getList(keyword, ids, limit);
     }
 
-    public List<Category> getList2(String keyword, List<Long> parentIds, Boolean onlyFirst) {
-        return mapper.getList2(keyword, parentIds, onlyFirst);
+    public List<Category> getListByParent(String keyword, List<Long> parentIds) {
+        return mapper.getListByParent(keyword, parentIds);
+    }
+
+    public List<Category> getFirstList(String keyword) {
+        return mapper.getFirstList(keyword);
     }
 
     /*
@@ -114,7 +118,7 @@ public class CategoryService {
     }
 
     public void collectLeafItemIds(Long parentId, List<Long> leafItemIds) {
-        List<Category> children = getList2(null , Collections.singletonList(parentId), null);
+        List<Category> children = getListByParent(null , Collections.singletonList(parentId));
 
         // 判断是否为叶子节点
         if (0 != children.size()) {

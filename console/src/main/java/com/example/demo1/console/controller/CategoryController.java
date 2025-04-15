@@ -73,8 +73,8 @@ public class CategoryController {
         return categoryItemVo;
     }
 
-    @RequestMapping("/category/list")
-    public CategoryItemListVo getCategoryList() {
+    @RequestMapping("/category/ntree")
+    public CategoryItemListVo getCategoryTree() {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
         List<Category> list = categoryService.getList(null, null, null);
         if (list.isEmpty()) {

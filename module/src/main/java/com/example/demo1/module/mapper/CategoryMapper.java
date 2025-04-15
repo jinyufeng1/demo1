@@ -33,7 +33,9 @@ public interface CategoryMapper {
 
 	List<Category> getList(@Param("keyword") String keyword, @Param("ids") Set<Long> ids, @Param("limit") Boolean limit);
 
-	List<Category> getList2(@Param("keyword") String keyword, @Param("parentIds") List<Long> parentIds, @Param("onlyFirst") Boolean onlyFirst);
+	List<Category> getListByParent(@Param("keyword") String keyword, @Param("parentIds") List<Long> parentIds);
+
+	List<Category> getFirstList(@Param("keyword") String keyword);
 
 	@Update("update category set is_deleted = 1, update_time = #{timestamp} where id = #{id} or parent_id = #{id}")
 	int deleteHierarchy(@Param("id") Long id, @Param("timestamp") Integer timestamp);
