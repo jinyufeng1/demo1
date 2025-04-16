@@ -71,53 +71,28 @@ public class CategoryController {
         return categoryItemListVo;
     }
 
-
-    /**
-     * 设置推荐列表
-     * @param levelThreeAboveVo
-     * @param page
-     * @param leafCategoryIds
-     * @return 是否取完
-     */
-    private Boolean setCoachItems(LevelThreeAboveVo levelThreeAboveVo, int page, List<Long> leafCategoryIds) {
-        // 获取推荐列表
-        List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(page, leafCategoryIds)
-                .stream().map(e -> {
-                    CoachItemVo coachItemVo = new CoachItemVo();
-                    BeanUtils.copyProperties(e, coachItemVo);
-                    String pics = e.getPics();
-                    //不需要判断是否包含split参数，没有就不切
-                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(CustomUtils.transformObj(pic));
-                    return coachItemVo;
-                }).collect(Collectors.toList());
-
-        if (coachItemVos.isEmpty()) {
-            levelThreeAboveVo.setIsEnd(true);
-            return true;
-        }
-
-        levelThreeAboveVo.setCoachItems(coachItemVos);
-        boolean isEnd = coachItemVos.size() < Constant.PAGE_SIZE;
-        levelThreeAboveVo.setIsEnd(isEnd);
-
-        return isEnd;
-    }
-
     @RequestMapping("/category/nlist")
     public LevelThreeAboveVo getLevelThreeAboveList(@RequestParam(name = "wp", required = false) String wp,
                                                     @RequestParam(name = "parentId", required = false) Long parentId) {
+        int page;
+        List<Long> leafCategoryIds = null;
         WpVo wpVo = null;
         if (StringUtils.hasLength(wp)) {
             //Base64解码
             String decode = new String(Base64.getUrlDecoder().decode(wp));
             //获取json转实体
             wpVo = JSON.parseObject(decode, WpVo.class);
+
+            page = wpVo.getPage();
+            leafCategoryIds = wpVo.getLeafCategoryIds();
+        }
+        else {
+            page = 1;
         }
 
         LevelThreeAboveVo levelThreeAboveVo = new LevelThreeAboveVo();
-        // 第一次进入 提供类目列表和推荐列表
-        if (ObjectUtils.isEmpty(wpVo)) {
+        // 获取下级类目列表
+        if (1 == page) {
             // 获取下级类目列表
             List<Category> list = categoryService.getListByParent(null , Collections.singletonList(parentId));
             //如果没有后面都不用做了
@@ -136,28 +111,40 @@ public class CategoryController {
             levelThreeAboveVo.setCategoryItems(categoryItems);
 
             // 向下递归，收集叶子节点类目id
-            List<Long> leafCategoryIds = new ArrayList<>();
+            leafCategoryIds = new ArrayList<>();
             categoryService.collectLeafItemIds(parentId, leafCategoryIds);
-
-            if (setCoachItems(levelThreeAboveVo, 1, leafCategoryIds)) {
-                return levelThreeAboveVo;
-            }
-
-            wpVo = new WpVo(2, null, null, leafCategoryIds);            // 构建下一页需要的wp
         }
-        // 第n次进入 只提供推荐列表
+
+        // 获取推荐列表
+        List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(page, leafCategoryIds)
+                .stream().map(e -> {
+                    CoachItemVo coachItemVo = new CoachItemVo();
+                    BeanUtils.copyProperties(e, coachItemVo);
+                    String pics = e.getPics();
+                    //不需要判断是否包含split参数，没有就不切
+                    String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                    coachItemVo.setPic(CustomUtils.transformObj(pic));
+                    return coachItemVo;
+                }).collect(Collectors.toList());
+
+        if (coachItemVos.isEmpty()) {
+            levelThreeAboveVo.setIsEnd(true);
+            return levelThreeAboveVo;
+        }
+
+        levelThreeAboveVo.setCoachItems(coachItemVos);
+        boolean isEnd = coachItemVos.size() < Constant.PAGE_SIZE;
+        levelThreeAboveVo.setIsEnd(isEnd);
+
+        if (isEnd) {
+            return levelThreeAboveVo;
+        }
+
+        if (1 == page) {
+            wpVo = new WpVo(2, null, null, leafCategoryIds);
+        }
         else {
-
-            if (wpVo.getLeafCategoryIds().isEmpty()) {
-                levelThreeAboveVo.setIsEnd(true);
-                return levelThreeAboveVo;
-            }
-
-            if (setCoachItems(levelThreeAboveVo, wpVo.getPage(), wpVo.getLeafCategoryIds())) {
-                return levelThreeAboveVo;
-            }
-
-            wpVo.setPage(wpVo.getPage() + 1);             // 更新下一页需要的wp
+            wpVo.setPage(wpVo.getPage() + 1);
         }
 
         // 实体转json
