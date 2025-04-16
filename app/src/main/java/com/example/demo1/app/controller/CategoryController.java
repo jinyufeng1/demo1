@@ -72,8 +72,16 @@ public class CategoryController {
     }
 
 
-    private List<CoachItemVo> getCoachItemVos(int page, List<Long> leafCategoryIds) {
-        return coachService.getPageListLinkTable2(page, leafCategoryIds)
+    /**
+     * 设置推荐列表
+     * @param levelThreeAboveVo
+     * @param page
+     * @param leafCategoryIds
+     * @return 是否取完
+     */
+    private Boolean setCoachItems(LevelThreeAboveVo levelThreeAboveVo, int page, List<Long> leafCategoryIds) {
+        // 获取推荐列表
+        List<CoachItemVo> coachItemVos = coachService.getPageListLinkTable2(page, leafCategoryIds)
                 .stream().map(e -> {
                     CoachItemVo coachItemVo = new CoachItemVo();
                     BeanUtils.copyProperties(e, coachItemVo);
@@ -83,6 +91,17 @@ public class CategoryController {
                     coachItemVo.setPic(CustomUtils.transformObj(pic));
                     return coachItemVo;
                 }).collect(Collectors.toList());
+
+        if (coachItemVos.isEmpty()) {
+            levelThreeAboveVo.setIsEnd(true);
+            return true;
+        }
+
+        levelThreeAboveVo.setCoachItems(coachItemVos);
+        boolean isEnd = coachItemVos.size() < Constant.PAGE_SIZE;
+        levelThreeAboveVo.setIsEnd(isEnd);
+
+        return isEnd;
     }
 
     @RequestMapping("/category/nlist")
@@ -120,15 +139,10 @@ public class CategoryController {
             List<Long> leafCategoryIds = new ArrayList<>();
             categoryService.collectLeafItemIds(parentId, leafCategoryIds);
 
-            // 获取推荐列表
-            List<CoachItemVo> coachItemVos = getCoachItemVos(1, leafCategoryIds);
-            if (coachItemVos.isEmpty()) {
-                levelThreeAboveVo.setIsEnd(true);
+            if (setCoachItems(levelThreeAboveVo, 1, leafCategoryIds)) {
                 return levelThreeAboveVo;
             }
 
-            levelThreeAboveVo.setCoachItems(coachItemVos);
-            levelThreeAboveVo.setIsEnd(coachItemVos.size() < Constant.PAGE_SIZE);
             wpVo = new WpVo(2, null, null, leafCategoryIds);            // 构建下一页需要的wp
         }
         // 第n次进入 只提供推荐列表
@@ -139,15 +153,10 @@ public class CategoryController {
                 return levelThreeAboveVo;
             }
 
-            // 获取推荐列表
-            List<CoachItemVo> coachItemVos = getCoachItemVos(wpVo.getPage(), wpVo.getLeafCategoryIds());
-            if (coachItemVos.isEmpty()) {
-                levelThreeAboveVo.setIsEnd(true);
+            if (setCoachItems(levelThreeAboveVo, wpVo.getPage(), wpVo.getLeafCategoryIds())) {
                 return levelThreeAboveVo;
             }
 
-            levelThreeAboveVo.setCoachItems(coachItemVos);
-            levelThreeAboveVo.setIsEnd(coachItemVos.size() < Constant.PAGE_SIZE);
             wpVo.setPage(wpVo.getPage() + 1);             // 更新下一页需要的wp
         }
 
