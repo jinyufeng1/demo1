@@ -1,5 +1,6 @@
 package com.example.demo1.console.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo1.console.domain.CoachDetailsVo;
 import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
@@ -8,8 +9,10 @@ import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
+import com.example.demo1.module.entity.User;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import com.example.demo1.module.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +34,9 @@ public class CoachController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private UserService userService;
 
     //新增教练信息
     @RequestMapping("/coach/add")
@@ -73,7 +81,29 @@ public class CoachController {
 
     @RequestMapping("/coach/list")
     public CoachItemListVo getCoachList(@RequestParam("page") Integer page,
-                                        @RequestParam(name = "keyword", required = false) String keyword) {
+                                        @RequestParam(name = "keyword", required = false) String keyword, HttpServletRequest request) {
+        // 登录判断
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
+
+        if (null == token) {
+            throw new RuntimeException("未登录用户");
+        }
+
+        String decode = new String(Base64.getUrlDecoder().decode(token));
+        //获取json转实体
+        User user = JSON.parseObject(decode, User.class);
+        if (ObjectUtils.isEmpty(userService.getById(user.getId()))) {
+            throw new RuntimeException("不存在的登录用户");
+        }
+
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
