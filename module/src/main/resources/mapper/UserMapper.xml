@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo1.module.mapper.UserMapper">
+
+    <insert id="insert" parameterType="com.example.demo1.module.entity.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user (
+        <trim suffixOverrides=",">
+            <if test="entity.name != null and entity.name != ''">`name`,</if>
+            <if test="entity.password != null and entity.password != ''">`password`,</if>
+            <if test="entity.phone != null and entity.phone != ''">`phone`,</if>
+            <if test="entity.avatar != null and entity.avatar != ''">`avatar`,</if>
+            <if test="entity.createTime != null">`create_time`,</if>
+            <if test="entity.updateTime != null">`update_time`,</if>
+            <if test="entity.isDeleted != null">`is_deleted`,</if>
+        </trim>
+        )
+        values (
+        <trim suffixOverrides=",">
+            <if test="entity.name != null and entity.name != ''">#{entity.name},</if>
+            <if test="entity.password != null and entity.password != ''">#{entity.password},</if>
+            <if test="entity.phone != null and entity.phone != ''">#{entity.phone},</if>
+            <if test="entity.avatar != null and entity.avatar != ''">#{entity.avatar},</if>
+            <if test="entity.createTime != null">#{entity.createTime},</if>
+            <if test="entity.updateTime != null">#{entity.updateTime},</if>
+            <if test="entity.isDeleted != null">#{entity.isDeleted},</if>
+        </trim>
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo1.module.entity.User">
+        update user
+        set
+        <trim suffixOverrides=",">
+            <if test="entity.name != null and entity.name != ''">`name` = #{entity.name},</if>
+            <if test="entity.password != null and entity.password != ''">`password` = #{entity.password},</if>
+            <if test="entity.phone != null and entity.phone != ''">`phone` = #{entity.phone},</if>
+            <if test="entity.avatar != null and entity.avatar != ''">`avatar` = #{entity.avatar},</if>
+            <if test="entity.createTime != null">`create_time` = #{entity.createTime},</if>
+            <if test="entity.updateTime != null">`update_time` = #{entity.updateTime},</if>
+            <if test="entity.isDeleted != null">`is_deleted` = #{entity.isDeleted},</if>
+        </trim>
+        where id = #{entity.id} limit 1
+    </update>
+    <select id="getByProperty" resultType="com.example.demo1.module.entity.User">
+        select * from user
+        where is_deleted = 0
+        <if test="entity.id != null and entity.id != ''">and `id` = #{entity.id}</if>
+        <if test="entity.name != null and entity.name != ''">and `name` = #{entity.name}</if>
+        <if test="entity.password != null and entity.password != ''">and `password` = #{entity.password}</if>
+        <if test="entity.phone != null and entity.phone != ''">and `phone` = #{entity.phone}</if>
+        <if test="entity.avatar != null and entity.avatar != ''">and `avatar` = #{entity.avatar}</if>
+        <if test="entity.updateTime != null">and `update_time` = #{entity.updateTime}</if>
+        <if test="entity.createTime != null">and `create_time` = #{entity.createTime}</if>
+        order by id
+    </select>
+
+</mapper>
