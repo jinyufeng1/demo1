@@ -5,8 +5,6 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import java.util.List;
-
 /**
  * <p>
  * 用户信息表 Mapper 接口
@@ -30,5 +28,5 @@ public interface UserMapper {
 	
 	int update(@Param("entity") User entity);
 
-	List<User> getByProperty(@Param("entity") User entity);
+	User getByPhone(@Param("phone") String phone);
 }

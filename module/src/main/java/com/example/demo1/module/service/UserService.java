@@ -1,13 +1,13 @@
 package com.example.demo1.module.service;
 
-import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.entity.User;
 import com.example.demo1.module.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * <p>
@@ -43,6 +43,11 @@ public class UserService {
     }
 
 	public Boolean insert(User entity) {
+        String phone = entity.getPhone();
+        User user = getByPhone(phone);
+        if (null != user) {
+            throw new RuntimeException("手机号：" + phone + "无法重复注册系统用户，请换号！");
+        }
         //todo 加密密码
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
@@ -61,12 +66,12 @@ public class UserService {
         return 1 == mapper.update(entity);
     }
 
-    public List<User> getByProperty(User entity) {
+    public User getByPhone(String phone) {
         // 判断entity，避免无字段条件查到整张表的数据
-        if (CustomUtils.isAllFieldsNull(entity)) {
-            log.warn("不合理的使用UserService.getByProperty(User entity)，entity参数为null或属性全为null！");
+        if (!StringUtils.hasLength(phone)) {
+            log.warn("不合理的使用UserService.getByProperty(String phone)，phone参数为null或属性全为null！");
             return null;
         }
-        return mapper.getByProperty(entity);
+        return mapper.getByPhone(phone);
     }
 }

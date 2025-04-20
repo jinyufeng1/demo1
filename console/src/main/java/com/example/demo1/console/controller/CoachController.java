@@ -7,9 +7,9 @@ import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.domain.EditCoachDTO;
+import com.example.demo1.module.domain.Sign;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
-import com.example.demo1.module.entity.User;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import com.example.demo1.module.service.UserService;
@@ -84,23 +84,31 @@ public class CoachController {
                                         @RequestParam(name = "keyword", required = false) String keyword, HttpServletRequest request) {
         // 登录判断
         Cookie[] cookies = request.getCookies();
-        String token = null;
+        String signStr = null;
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    token = cookie.getValue();
+                if ("sign".equals(cookie.getName())) {
+                    signStr = cookie.getValue();
+                    break;
                 }
             }
         }
 
-        if (null == token) {
+        if (null == signStr) {
             throw new RuntimeException("未登录用户");
         }
 
-        String decode = new String(Base64.getUrlDecoder().decode(token));
+        //Base64解码
+        String decode = new String(Base64.getUrlDecoder().decode(signStr));
         //获取json转实体
-        User user = JSON.parseObject(decode, User.class);
-        if (ObjectUtils.isEmpty(userService.getById(user.getId()))) {
+        Sign sign = JSON.parseObject(decode, Sign.class);
+
+        Long expirationTime = sign.getExpirationTime();
+        if (expirationTime < System.currentTimeMillis()) {
+            throw new RuntimeException("登录已超时");
+        }
+
+        if (ObjectUtils.isEmpty(userService.getById(sign.getId()))) {
             throw new RuntimeException("不存在的登录用户");
         }
 
