@@ -1,8 +1,11 @@
 package com.example.demo1.module.service;
 
+import com.example.demo1.module.domain.EditUserDTO;
 import com.example.demo1.module.entity.User;
 import com.example.demo1.module.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -43,12 +46,20 @@ public class UserService {
     }
 
 	public Boolean insert(User entity) {
+        if (null == entity.getPassword()) {
+            throw new RuntimeException("插入失败，密码必填！");
+        }
+
         String phone = entity.getPhone();
+        if (null == phone) {
+            throw new RuntimeException("插入失败，手机号必填！");
+        }
+
         User user = getByPhone(phone);
         if (null != user) {
             throw new RuntimeException("手机号：" + phone + "无法重复注册系统用户，请换号！");
         }
-        //todo 加密密码
+
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
         entity.setUpdateTime((int)timestamp);
@@ -59,6 +70,14 @@ public class UserService {
         Long id = entity.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
             throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+        }
+
+        // 失去修改的意义
+        if (null == entity.getName()
+                && null == entity.getPassword()
+                && null == entity.getPhone()
+                && null == entity.getAvatar()) {
+            return false;
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -73,5 +92,36 @@ public class UserService {
             return null;
         }
         return mapper.getByPhone(phone);
+    }
+
+
+    /**
+     * 合并 insert & update
+     * @param dto
+     * @return
+     */
+    public String edit(EditUserDTO dto) {
+        if (ObjectUtils.isEmpty(dto)) {
+            throw new RuntimeException("UserService类，public String edit(EditUserDTO dto)方法拒绝处理，dto对象为空对象");
+        }
+
+        String password = dto.getPassword();
+        //BCrypt算法加密 盐在密文中
+        if (null != password) {
+            dto.setPassword(BCrypt.hashpw(password, BCrypt.gensalt())); // 生成一个随机的盐值并返回加密后的密码字符串。工作因子默认为10。
+        }
+
+        // copy
+        User user = new User();
+        BeanUtils.copyProperties(dto, user);
+        Boolean result;
+        // id校验
+        if (ObjectUtils.isEmpty(user.getId())) {
+            result = insert(user);
+        }
+        else {
+            result = update(user);
+        }
+        return result ? user.getId().toString() : null;
     }
 }

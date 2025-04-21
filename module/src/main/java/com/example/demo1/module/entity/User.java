@@ -1,6 +1,5 @@
 package com.example.demo1.module.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -12,7 +11,6 @@ import lombok.Data;
  * @since 2025-04-19
  */
 @Data
-@AllArgsConstructor
 public class User {
     private Long id;
     private String name;

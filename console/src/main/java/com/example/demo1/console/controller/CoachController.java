@@ -13,6 +13,7 @@ import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import com.example.demo1.module.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class CoachController {
 
@@ -95,7 +97,9 @@ public class CoachController {
         }
 
         if (null == signStr) {
-            throw new RuntimeException("未登录用户");
+//            throw new RuntimeException("未登录用户");
+            log.error("未登录用户");
+            return null;
         }
 
         //Base64解码
@@ -105,11 +109,15 @@ public class CoachController {
 
         Long expirationTime = sign.getExpirationTime();
         if (expirationTime < System.currentTimeMillis()) {
-            throw new RuntimeException("登录已超时");
+//            throw new RuntimeException("登录已超时");
+            log.error("登录已超时");
+            return null;
         }
 
         if (ObjectUtils.isEmpty(userService.getById(sign.getId()))) {
-            throw new RuntimeException("不存在的登录用户");
+//            throw new RuntimeException("不存在的登录用户");
+            log.error("不存在的登录用户");
+            return null;
         }
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();

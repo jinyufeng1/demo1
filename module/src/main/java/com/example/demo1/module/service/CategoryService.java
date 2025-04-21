@@ -45,6 +45,10 @@ public class CategoryService {
     }
 
 	public Boolean insert(Category entity) {
+        if (null == entity.getName()) {
+            throw new RuntimeException("插入失败，分类名称必填！");
+        }
+
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
         entity.setUpdateTime((int)timestamp);
@@ -55,6 +59,13 @@ public class CategoryService {
         Long id = entity.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
             throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+        }
+
+        // 失去修改的意义
+        if (null == entity.getName()
+                && null == entity.getPic()
+                && null == entity.getParentId()) {
+            return false;
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -74,9 +85,11 @@ public class CategoryService {
         return mapper.getFirstList(keyword);
     }
 
-    /*
-    合并 insert & update
- */
+    /**
+     * 合并 insert & update
+     * @param dto
+     * @return
+     */
     public String edit(EditCategoryDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
             throw new RuntimeException("CategoryService类，public String edit(EditCategoryDTO dto)方法拒绝处理，dto对象为空对象");
@@ -88,9 +101,6 @@ public class CategoryService {
             Category category = this.getById(parentId);
             if (ObjectUtils.isEmpty(category)) {
                 throw new RuntimeException("使用无效的parentId");
-            }
-            else if(null != category.getParentId()){
-                throw new RuntimeException("非一级节点不能作为父节点");
             }
         }
 

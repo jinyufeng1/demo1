@@ -76,6 +76,14 @@ public class CoachService {
     }
 
     public Boolean insert(Coach coach) {
+        if (null == coach.getName()) {
+            throw new RuntimeException("插入失败，教练名称必填！");
+        }
+
+        if (null == coach.getCategoryId()) {
+            throw new RuntimeException("插入失败，所属分类id必填！");
+        }
+
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setCreateTime((int) timestamp);
         coach.setUpdateTime((int) timestamp);
@@ -88,13 +96,24 @@ public class CoachService {
             throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
 
+        // 失去修改的意义
+        if (null == coach.getName()
+                && null == coach.getPics()
+                && null == coach.getSpeciality()
+                && null == coach.getIntro()
+                && null == coach.getCategoryId()) {
+            return false;
+        }
+
         long timestamp = System.currentTimeMillis() / 1000;
         coach.setUpdateTime((int) timestamp);
         return 1 == mapper.update(coach);
     }
 
-    /*
-        合并 insert & update
+    /**
+     * 合并 insert & update
+     * @param dto
+     * @return
      */
     public String edit(EditCoachDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {

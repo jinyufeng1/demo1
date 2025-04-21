@@ -7,10 +7,10 @@ import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class CategoryController {
     @Autowired
@@ -33,7 +34,9 @@ public class CategoryController {
         List<Category> firstList = categoryService.getFirstList(keyword); // 一级分类
 
         if (firstList.isEmpty()) {
-            throw new RuntimeException("分类信息异常，无一级分类信息！");
+//            throw new RuntimeException("分类信息异常，无一级分类信息！");
+            log.error("分类信息异常，无一级分类信息！");
+            return null;
         }
         List<Long> parentIds = firstList.stream().map(Category::getId).collect(Collectors.toList());
 

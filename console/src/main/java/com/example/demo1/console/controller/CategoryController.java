@@ -9,6 +9,7 @@ import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class CategoryController {
 
@@ -97,7 +99,9 @@ public class CategoryController {
         }
 
         if (firstList.isEmpty()) {
-            throw new RuntimeException("分类信息异常，无一级分类信息！");
+//            throw new RuntimeException("分类信息异常，无一级分类信息！");
+            log.error("分类信息异常，无一级分类信息！");
+            return null;
         }
 
         //构建层级列表

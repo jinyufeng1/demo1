@@ -5,6 +5,8 @@ import com.example.demo1.console.domain.UserVo;
 import com.example.demo1.module.domain.Sign;
 import com.example.demo1.module.entity.User;
 import com.example.demo1.module.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +16,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Base64;
 
+@Slf4j
 @RestController
 public class UserController {
 
@@ -24,13 +27,17 @@ public class UserController {
     public UserVo login(@RequestParam("phone") String phone, @RequestParam("password") String password, HttpServletResponse response) {
         User user = userService.getByPhone(phone);
         if (null == user) {
-            throw new RuntimeException("手机号 ： " + phone + "尚未注册系统账号！");
+//            throw new RuntimeException("手机号 ： " + phone + "尚未注册系统账号！");
+            log.error("手机号 ： {} 尚未注册系统账号！", phone);
+            return null;
+
         }
 
-        // 问题： 这个地方如果实现了加密，我是不是可以直接对比传进来的密文是否相等就行了？？？
-        String password1 = user.getPassword();
-        if (!password.equals(password1)) {
-            throw new RuntimeException("密码错误，请核对后重新填写！");
+        // 检查原始密码和存储的哈希值是否匹配。返回true或false。
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+//            throw new RuntimeException("密码错误，请核对后重新填写！");
+            log.error("密码错误，请核对后重新填写！");
+            return null;
         }
 
         // 构建sign
