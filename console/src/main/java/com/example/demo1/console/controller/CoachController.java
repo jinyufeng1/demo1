@@ -1,18 +1,16 @@
 package com.example.demo1.console.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.example.demo1.console.domain.CoachDetailsVo;
 import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
+import com.example.demo1.module.common.Response;
 import com.example.demo1.module.domain.EditCoachDTO;
-import com.example.demo1.module.domain.Sign;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
-import com.example.demo1.module.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,98 +33,47 @@ public class CoachController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private UserService userService;
-
     //新增教练信息
     @RequestMapping("/coach/add")
-    public String addCoach(@RequestParam(name = "pics", required = false) String pics,
-                           @RequestParam("name") String name,
-                           @RequestParam("categoryId") Long categoryId,
-                           @RequestParam(name = "speciality", required = false) String speciality,
-                           @RequestParam(name = "intro", required = false) String intro) {
-        try {
-            // trim to name; Due to required=false in springmvc,name can't be null at all!!!
-            return coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            // 返回异常信息
-            return "add接口捕获异常信息：" + e.getMessage();
-        }
+    public Response<Long> addCoach(@RequestParam(name = "pics", required = false) String pics,
+                             @RequestParam("name") String name,
+                             @RequestParam("categoryId") Long categoryId,
+                             @RequestParam(name = "speciality", required = false) String speciality,
+                             @RequestParam(name = "intro", required = false) String intro) {
+        Long coachId = coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
+        return new Response<>(1001, coachId);
     }
 
     //删除教练信息
     @RequestMapping("/coach/del")
-    public Boolean delCoach(@RequestParam("id") Long id) {
-        return coachService.delete(id);
+    public Response<Boolean> delCoach(@RequestParam("id") Long id) {
+        Boolean delete = coachService.delete(id);
+        return new Response<>(1001, delete);
     }
 
     //修改教练信息
     @RequestMapping("/coach/update")
-    public String updateCoach(@RequestParam(name = "id") Long id,
+    public Response<Long> updateCoach(@RequestParam(name = "id") Long id,
                               @RequestParam(name = "categoryId", required = false) Long categoryId,
                               @RequestParam(name = "pics", required = false) String pics,
                               @RequestParam(name = "name", required = false) String name,
                               @RequestParam(name = "speciality", required = false) String speciality,
                               @RequestParam(name = "intro", required = false) String intro) {
-        try {
-            // trim to name;
-            return coachService.edit(new EditCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            // 返回异常信息
-            return "upate接口捕获异常信息：" + e.getMessage();
-        }
+        Long coachId = coachService.edit(new EditCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
+        return new Response<>(1001, coachId);
     }
 
     @RequestMapping("/coach/list")
-    public CoachItemListVo getCoachList(@RequestParam("page") Integer page,
-                                        @RequestParam(name = "keyword", required = false) String keyword, HttpServletRequest request) {
-        // 登录判断
-        Cookie[] cookies = request.getCookies();
-        String signStr = null;
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("sign".equals(cookie.getName())) {
-                    signStr = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (null == signStr) {
-//            throw new RuntimeException("未登录用户");
-            log.error("未登录用户");
-            return null;
-        }
-
-        //Base64解码
-        String decode = new String(Base64.getUrlDecoder().decode(signStr));
-        //获取json转实体
-        Sign sign = JSON.parseObject(decode, Sign.class);
-
-        Long expirationTime = sign.getExpirationTime();
-        if (expirationTime < System.currentTimeMillis()) {
-//            throw new RuntimeException("登录已超时");
-            log.error("登录已超时");
-            return null;
-        }
-
-        if (ObjectUtils.isEmpty(userService.getById(sign.getId()))) {
-//            throw new RuntimeException("不存在的登录用户");
-            log.error("不存在的登录用户");
-            return null;
-        }
-
+    public Response<CoachItemListVo> getCoachList(@RequestParam("page") Integer page,
+                                        @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
         int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
-        // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
-            coachItemListVo.setList(new ArrayList<>());
-            return coachItemListVo;
+            log.info("console CoachController 总数都为0就不用查了，节约数据库访问");
+            return new Response<>(1001, coachItemListVo);
         }
 
         //如果没有数据，getCoachList会拿到一个空的ArrayList对象
@@ -161,21 +106,20 @@ public class CoachController {
         }
         coachItemListVo.setList(list);
 
-        return coachItemListVo;
+        return new Response<>(1001, coachItemListVo);
     }
 
     @RequestMapping("/coach/list2")
-    public CoachItemListVo getCoachList2(@RequestParam("page") Integer page,
+    public Response<CoachItemListVo> getCoachList2(@RequestParam("page") Integer page,
                                          @RequestParam(name = "keyword", required = false) String keyword) {
         CoachItemListVo coachItemListVo = new CoachItemListVo();
         coachItemListVo.setPageSize(Constant.PAGE_SIZE);
 
         int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
-        // 总是都为0就不用查了，节约数据库访问
         if (0 == coachTotal) {
-            coachItemListVo.setList(new ArrayList<>());
-            return coachItemListVo;
+            log.info("console CoachController 总数都为0就不用查了，节约数据库访问");
+            return new Response<>(1001, coachItemListVo);
         }
 
         List<CoachItemVo> list = coachService.getPageListLinkTable(page, keyword)
@@ -186,22 +130,25 @@ public class CoachController {
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);
-        return coachItemListVo;
+        return new Response<>(1001, coachItemListVo);
     }
 
     @RequestMapping("/coach/detail")
-    public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") Long id) {
+    public Response<CoachDetailsVo> getCoachDetail(@RequestParam(name = "id") Long id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
         Coach coachInfo = coachService.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
-            return coachDetailsVo;
+            log.info("console CoachController 教练id：{}不存在", id);
+            return new Response<>(1001, coachDetailsVo);
         }
 
+        Long categoryId = coachInfo.getCategoryId();
         // 获取分类信息
-        Category category = categoryService.getById(coachInfo.getCategoryId());
+        Category category = categoryService.getById(categoryId);
         if (ObjectUtils.isEmpty(category)) {
-            return coachDetailsVo;
+            log.info("console CoachController 分类id：{}不存在", categoryId);
+            return new Response<>(1001, coachDetailsVo);
         }
 
         coachDetailsVo.setIntro(coachInfo.getIntro());
@@ -216,6 +163,6 @@ public class CoachController {
         coachDetailsVo.setIcon(category.getPic());
         coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime() * 1000L, Constant.DATE_PATTERN_1));
         coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime() * 1000L, Constant.DATE_PATTERN_1));
-        return coachDetailsVo;
+        return new Response<>(1001, coachDetailsVo);
     }
 }

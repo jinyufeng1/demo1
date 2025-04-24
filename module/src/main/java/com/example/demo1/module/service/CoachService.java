@@ -67,7 +67,9 @@ public class CoachService {
     }
 
     public Boolean delete(Long id) {
+        String position = "CoachService [public Boolean delete(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
+            log.info(position + "删除失败，目标id：{}不存在", id);
             return false;
         }
 
@@ -76,12 +78,21 @@ public class CoachService {
     }
 
     public Boolean insert(Coach coach) {
+        String position = "CoachService [public Boolean insert(Coach coach)]";
+        // 缺参数的问题是方法使用的问题，让技术人员知道就好，在程序内部打印错误日志
+        if (null == coach) {
+            log.error(position + "插入失败，entity为空！");
+            return false;
+        }
+
         if (null == coach.getName()) {
-            throw new RuntimeException("插入失败，教练名称必填！");
+            log.error(position + "插入失败，教练名称必填！");
+            return false;
         }
 
         if (null == coach.getCategoryId()) {
-            throw new RuntimeException("插入失败，所属分类id必填！");
+            log.error(position + "插入失败，所属分类id必填！");
+            return false;
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -91,9 +102,16 @@ public class CoachService {
     }
 
     public Boolean update(Coach coach) {
+        String position = "CoachService [public Boolean update(Coach coach)]";
+        if (null == coach) {
+            log.error(position + "更新失败，entity为空！");
+            return false;
+        }
+
         Long id = coach.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+            log.error(position + "更新失败，目标id：{}不存在", id);
+            return false;
         }
 
         // 失去修改的意义
@@ -102,6 +120,7 @@ public class CoachService {
                 && null == coach.getSpeciality()
                 && null == coach.getIntro()
                 && null == coach.getCategoryId()) {
+            log.error(position + "更新失败，业务字段全为空");
             return false;
         }
 
@@ -115,15 +134,18 @@ public class CoachService {
      * @param dto
      * @return
      */
-    public String edit(EditCoachDTO dto) {
+    public Long edit(EditCoachDTO dto) {
+        String position = "CoachService [public Long edit(EditUserDTO dto)]";
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("CoachService类，public String edit(EditCoachDTO dto)方法拒绝处理，dto对象为空对象");
+            log.error(position + "dto对象为空对象");
+            return null;
         }
 
         // 分类校验
         Long categoryId = dto.getCategoryId();
         if (null != categoryId && ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
-            throw new RuntimeException("使用无效的categoryId");
+            log.error(position + "使用无效的categoryId");
+            return null;
         }
 
         // copy
@@ -137,13 +159,14 @@ public class CoachService {
         } else {
             result = update(coach);
         }
-        return result ? coach.getId().toString() : null;
+        return result ? coach.getId() : null;
     }
 
     public List<Coach> getByProperty(Coach entity) {
+        String position = "CoachService [public List<Coach> getByProperty(Coach entity)]";
         // 判断entity，避免无字段条件查到整张表的数据
         if (CustomUtils.isAllFieldsNull(entity)) {
-            log.warn("不合理的使用CoachService.getByProperty(Coach entity)，entity参数为null或属性全为null！");
+            log.warn(position + "entity参数为null或属性全为null");
             return null;
         }
         return mapper.getByProperty(entity);

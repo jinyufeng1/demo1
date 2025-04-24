@@ -2,6 +2,7 @@ package com.example.demo1.console.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.example.demo1.console.domain.UserVo;
+import com.example.demo1.module.common.Response;
 import com.example.demo1.module.domain.Sign;
 import com.example.demo1.module.entity.User;
 import com.example.demo1.module.service.UserService;
@@ -24,20 +25,15 @@ public class UserController {
     private UserService userService;
 
     @RequestMapping("/user/login")
-    public UserVo login(@RequestParam("phone") String phone, @RequestParam("password") String password, HttpServletResponse response) {
+    public Response<UserVo> login(@RequestParam("phone") String phone, @RequestParam("password") String password, HttpServletResponse response) {
         User user = userService.getByPhone(phone);
         if (null == user) {
-//            throw new RuntimeException("手机号 ： " + phone + "尚未注册系统账号！");
-            log.error("手机号 ： {} 尚未注册系统账号！", phone);
-            return null;
-
+            return new Response<>(2001);
         }
 
         // 检查原始密码和存储的哈希值是否匹配。返回true或false。
         if (!BCrypt.checkpw(password, user.getPassword())) {
-//            throw new RuntimeException("密码错误，请核对后重新填写！");
-            log.error("密码错误，请核对后重新填写！");
-            return null;
+            return new Response<>(1003);
         }
 
         // 构建sign
@@ -51,6 +47,7 @@ public class UserController {
         cookie.setPath("/"); // 设置Cookie的作用路径
         response.addCookie(cookie); // 将Cookie添加到响应中
 
-        return new UserVo(user.getName(), user.getPhone(), user.getAvatar());
+        UserVo userVo = new UserVo(user.getName(), user.getPhone(), user.getAvatar());
+        return new Response<>(1001, userVo);
     }
 }

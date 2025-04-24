@@ -4,6 +4,7 @@ import com.example.demo1.console.domain.CategoryItemListVo;
 import com.example.demo1.console.domain.CategoryItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
+import com.example.demo1.module.common.Response;
 import com.example.demo1.module.domain.EditCategoryDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
@@ -33,12 +34,13 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @RequestMapping("/category/add")
-    public String addCategory(@RequestParam("name") String name, @RequestParam(value = "icon", required = false) String icon, @RequestParam(value = "parentId") Long parentId) {
-        return categoryService.edit(new EditCategoryDTO(null, name, icon, parentId));
+    public Response<Long> addCategory(@RequestParam("name") String name, @RequestParam(value = "icon", required = false) String icon, @RequestParam(value = "parentId") Long parentId) {
+        Long categoryId = categoryService.edit(new EditCategoryDTO(null, name, icon, parentId));
+        return new Response<>(1001, categoryId);
     }
 
     @RequestMapping("/category/del")
-    public Boolean deleteCategory(@RequestParam("id") Long id) {
+    public Response<Boolean> deleteCategory(@RequestParam("id") Long id) {
         Boolean ret = categoryService.deleteHierarchy(id);
         if (ret) {
             //为解决循环依赖，将coachService提升一级，删除依赖这个分类的教练数据
@@ -46,12 +48,13 @@ public class CategoryController {
             entity.setCategoryId(id);
             coachService.deleteByProperty(entity);
         }
-        return ret;
+        return new Response<>(1001, ret);
     }
 
     @RequestMapping("/category/update")
-    public String updateCategory(@RequestParam("id") Long id, @RequestParam(value = "name", required = false) String name, @RequestParam(value = "icon", required = false) String icon, @RequestParam(value = "parentId") Long parentId) {
-        return categoryService.edit(new EditCategoryDTO(id, name, icon, parentId));
+    public Response<Long> updateCategory(@RequestParam("id") Long id, @RequestParam(value = "name", required = false) String name, @RequestParam(value = "icon", required = false) String icon, @RequestParam(value = "parentId") Long parentId) {
+        Long categoryId = categoryService.edit(new EditCategoryDTO(id, name, icon, parentId));
+        return new Response<>(1001, categoryId);
     }
 
     public CategoryItemVo shift(Category category, Map<Long, List<Category>> map) {
@@ -76,12 +79,12 @@ public class CategoryController {
     }
 
     @RequestMapping("/category/ntree")
-    public CategoryItemListVo getCategoryTree() {
+    public Response<CategoryItemListVo> getCategoryTree() {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
         List<Category> list = categoryService.getList(null, null, null);
         if (list.isEmpty()) {
-            categoryItemListVo.setList(new ArrayList<>());
-            return categoryItemListVo;
+            log.info("console CategoryController 无分类信息");
+            return new Response<>(1001, categoryItemListVo);
         }
 
         // 一级分类
@@ -99,15 +102,14 @@ public class CategoryController {
         }
 
         if (firstList.isEmpty()) {
-//            throw new RuntimeException("分类信息异常，无一级分类信息！");
-            log.error("分类信息异常，无一级分类信息！");
-            return null;
+            log.info("console CategoryController 无一级分类信息");
+            return new Response<>(1001, categoryItemListVo);
         }
 
         //构建层级列表
         List<CategoryItemVo> retList = firstList.stream().map(e -> shift(e, map)).collect(Collectors.toList());
 
         categoryItemListVo.setList(retList);
-        return categoryItemListVo;
+        return new Response<>(1001, categoryItemListVo);
     }
 }

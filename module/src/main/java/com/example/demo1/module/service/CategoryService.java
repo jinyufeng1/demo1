@@ -3,6 +3,7 @@ package com.example.demo1.module.service;
 import com.example.demo1.module.domain.EditCategoryDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.mapper.CategoryMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -20,6 +21,7 @@ import java.util.Set;
  * @author 我叫小呆呆
  * @since 2025-03-30
  */
+@Slf4j
 @Service
 public class CategoryService {
 
@@ -36,7 +38,9 @@ public class CategoryService {
     }
 
     public Boolean delete(Long id) {
+        String position = "CategoryService [public Boolean delete(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
+            log.info(position + "删除失败，目标id：{}不存在", id);
             return false;
         }
 
@@ -45,8 +49,15 @@ public class CategoryService {
     }
 
 	public Boolean insert(Category entity) {
+        String position = "CategoryService [public Boolean insert(Category entity)]";
+        if (null == entity) {
+            log.error(position + "插入失败，entity为空！");
+            return false;
+        }
+
         if (null == entity.getName()) {
-            throw new RuntimeException("插入失败，分类名称必填！");
+            log.error(position + "插入失败，分类名称必填！");
+            return false;
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -56,15 +67,23 @@ public class CategoryService {
     }
 
     public Boolean update(Category entity) {
+        String position = "CategoryService [public Boolean update(Category entity)]";
+        if (null == entity) {
+            log.error(position + "更新失败，entity为空！");
+            return false;
+        }
+
         Long id = entity.getId();
         if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+            log.error(position + "更新失败，目标id：{}不存在", id);
+            return false;
         }
 
         // 失去修改的意义
         if (null == entity.getName()
                 && null == entity.getPic()
                 && null == entity.getParentId()) {
+            log.error(position + "更新失败，业务字段全为空");
             return false;
         }
 
@@ -90,9 +109,11 @@ public class CategoryService {
      * @param dto
      * @return
      */
-    public String edit(EditCategoryDTO dto) {
+    public Long edit(EditCategoryDTO dto) {
+        String position = "CategoryService [public Long edit(EditCategoryDTO dto)]";
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("CategoryService类，public String edit(EditCategoryDTO dto)方法拒绝处理，dto对象为空对象");
+            log.error(position + "dto对象为空对象");
+            return null;
         }
 
         // 父级校验
@@ -100,7 +121,8 @@ public class CategoryService {
         if (null != parentId) {
             Category category = this.getById(parentId);
             if (ObjectUtils.isEmpty(category)) {
-                throw new RuntimeException("使用无效的parentId");
+                log.error(position + "使用无效的parentId");
+                return null;
             }
         }
 
@@ -115,11 +137,13 @@ public class CategoryService {
         else {
             result = update(category);
         }
-        return result ? category.getId().toString() : null;
+        return result ? category.getId() : null;
     }
 
     public Boolean deleteHierarchy(Long id) {
+        String position = "CategoryService [public Boolean deleteHierarchy(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
+            log.info(position + "删除失败，目标id：{}不存在", id);
             return false;
         }
 

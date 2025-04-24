@@ -2,6 +2,7 @@ package com.example.demo1.module.service;
 
 import com.example.demo1.module.domain.EditUserDTO;
 import com.example.demo1.module.entity.User;
+import com.example.demo1.module.exception.CustomException;
 import com.example.demo1.module.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
@@ -37,7 +38,9 @@ public class UserService {
     }
 
     public Boolean delete(Long id) {
+        String position = "UserService [public Boolean delete(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
+            log.info(position + "删除失败，目标id：{}不存在", id);
             return false;
         }
 
@@ -46,18 +49,28 @@ public class UserService {
     }
 
 	public Boolean insert(User entity) {
+        String position = "UserService [public Boolean insert(User entity)]";
+        // 缺参数的问题是方法使用的问题，让技术人员知道就好，在程序内部打印错误日志
+        if (null == entity) {
+            log.error(position + "插入失败，entity为空！");
+            return false;
+        }
+
         if (null == entity.getPassword()) {
-            throw new RuntimeException("插入失败，密码必填！");
+            log.error(position + "插入失败，密码必填！");
+            return false;
         }
 
         String phone = entity.getPhone();
         if (null == phone) {
-            throw new RuntimeException("插入失败，手机号必填！");
+            log.error(position + "插入失败，手机号必填！");
+            return false;
         }
 
+        // 手机号重复的问题是业务问题，应该让用户知道，所以抛出去
         User user = getByPhone(phone);
         if (null != user) {
-            throw new RuntimeException("手机号：" + phone + "无法重复注册系统用户，请换号！");
+            throw new CustomException(2002);
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -67,9 +80,21 @@ public class UserService {
     }
 
     public Boolean update(User entity) {
+        String position = "UserService [public Boolean update(User entity)]";
+        if (null == entity) {
+            log.error(position + "更新失败，entity为空！");
+            return false;
+        }
+
         Long id = entity.getId();
+        if (null == id) {
+            log.error(position + "更新失败，目标id为空！");
+            return false;
+        }
+
         if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+            log.error(position + "更新失败，目标id：{}不存在", id);
+            return false;
         }
 
         // 失去修改的意义
@@ -77,6 +102,7 @@ public class UserService {
                 && null == entity.getPassword()
                 && null == entity.getPhone()
                 && null == entity.getAvatar()) {
+            log.error(position + "更新失败，业务字段全为空");
             return false;
         }
 
@@ -86,9 +112,9 @@ public class UserService {
     }
 
     public User getByPhone(String phone) {
-        // 判断entity，避免无字段条件查到整张表的数据
+        String position = "UserService [public User getByPhone(String phone)]";
         if (!StringUtils.hasLength(phone)) {
-            log.warn("不合理的使用UserService.getByProperty(String phone)，phone参数为null或属性全为null！");
+            log.error(position + "参数phone为空");
             return null;
         }
         return mapper.getByPhone(phone);
@@ -100,9 +126,11 @@ public class UserService {
      * @param dto
      * @return
      */
-    public String edit(EditUserDTO dto) {
+    public Long edit(EditUserDTO dto) {
+        String position = "UserService [public Long edit(EditUserDTO dto)]";
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("UserService类，public String edit(EditUserDTO dto)方法拒绝处理，dto对象为空对象");
+            log.error(position + "dto对象为空对象");
+            return null;
         }
 
         String password = dto.getPassword();
@@ -122,6 +150,6 @@ public class UserService {
         else {
             result = update(user);
         }
-        return result ? user.getId().toString() : null;
+        return result ? user.getId() : null;
     }
 }

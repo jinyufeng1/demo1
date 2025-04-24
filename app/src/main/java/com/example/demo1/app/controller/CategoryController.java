@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.demo1.app.common.CustomUtils;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
+import com.example.demo1.module.common.Response;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
@@ -29,14 +30,13 @@ public class CategoryController {
     private CoachService coachService;
 
     @RequestMapping("/category/list")
-    public CategoryItemListVo getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
+    public Response<CategoryItemListVo> getCategoryList(@RequestParam(name = "keyword", required = false) String keyword) {
         CategoryItemListVo categoryItemListVo = new CategoryItemListVo();
         List<Category> firstList = categoryService.getFirstList(keyword); // 一级分类
 
         if (firstList.isEmpty()) {
-//            throw new RuntimeException("分类信息异常，无一级分类信息！");
-            log.error("分类信息异常，无一级分类信息！");
-            return null;
+            log.info("app CategoryController 无一级分类信息");
+            return new Response<>(1001, categoryItemListVo);
         }
         List<Long> parentIds = firstList.stream().map(Category::getId).collect(Collectors.toList());
 
@@ -71,11 +71,11 @@ public class CategoryController {
         }).collect(Collectors.toList());
 
         categoryItemListVo.setList(retList);
-        return categoryItemListVo;
+        return new Response<>(1001, categoryItemListVo);
     }
 
     @RequestMapping("/category/nlist")
-    public LevelThreeAboveVo getLevelThreeAboveList(@RequestParam(name = "wp", required = false) String wp,
+    public Response<LevelThreeAboveVo> getLevelThreeAboveList(@RequestParam(name = "wp", required = false) String wp,
                                                     @RequestParam(name = "parentId", required = false) Long parentId) {
         int page;
         List<Long> leafCategoryIds = null;
@@ -100,8 +100,9 @@ public class CategoryController {
             List<Category> list = categoryService.getListByParent(null , Collections.singletonList(parentId));
             //如果没有后面都不用做了
             if (list.isEmpty()) {
+                log.info("分类id：{}无下级分类", parentId);
                 levelThreeAboveVo.setIsEnd(true);
-                return levelThreeAboveVo;
+                return new Response<>(1001, levelThreeAboveVo);
             }
 
             List<CategoryItemVo> categoryItems = list.stream().map(e -> {
@@ -132,7 +133,7 @@ public class CategoryController {
 
         if (coachItemVos.isEmpty()) {
             levelThreeAboveVo.setIsEnd(true);
-            return levelThreeAboveVo;
+            return new Response<>(1001, levelThreeAboveVo);
         }
 
         levelThreeAboveVo.setCoachItems(coachItemVos);
@@ -140,7 +141,7 @@ public class CategoryController {
         levelThreeAboveVo.setIsEnd(isEnd);
 
         if (isEnd) {
-            return levelThreeAboveVo;
+            return new Response<>(1001, levelThreeAboveVo);
         }
 
         if (1 == page) {
@@ -156,6 +157,6 @@ public class CategoryController {
         String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         levelThreeAboveVo.setWp(wpString);
 
-        return levelThreeAboveVo;
+        return new Response<>(1001, levelThreeAboveVo);
     }
 }

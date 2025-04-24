@@ -7,10 +7,12 @@ import com.example.demo1.app.domain.CoachItemVo;
 import com.example.demo1.app.domain.WpVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
+import com.example.demo1.module.common.Response;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class CoachController {
 
@@ -32,8 +35,8 @@ public class CoachController {
     private CategoryService categoryService;
 
     @RequestMapping("/coach/list")
-    public CoachItemListVo getCoachList(@RequestParam(name = "wp", required = false) String wp,
-                                        @RequestParam(name = "keyword", required = false) String keyword) {
+    public Response<CoachItemListVo> getCoachList(@RequestParam(name = "wp", required = false) String wp,
+                                                 @RequestParam(name = "keyword", required = false) String keyword) {
 
         WpVo wpVo = null;
         if (StringUtils.hasLength(wp)) {
@@ -47,9 +50,8 @@ public class CoachController {
         // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
         List<Coach> pageList = coachService.getPageList(null == wpVo ? 1 : wpVo.getPage(), null == wpVo ? keyword : wpVo.getKeyword());
         if (pageList.isEmpty()) {
-            coachItemListVo.setList(new ArrayList<>());
             coachItemListVo.setIsEnd(true);
-            return coachItemListVo;
+            return new Response<>(1001, coachItemListVo);
         }
 
         // 没有取全表，而是根据id进行in条件查询
@@ -93,11 +95,11 @@ public class CoachController {
         String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         coachItemListVo.setWp(wpString);
 
-        return coachItemListVo;
+        return new Response<>(1001, coachItemListVo);
     }
 
     @RequestMapping("/coach/list2")
-    public CoachItemListVo getCoachList2(@RequestParam(name = "wp", required = false) String wp,
+    public Response<CoachItemListVo> getCoachList2(@RequestParam(name = "wp", required = false) String wp,
                                          @RequestParam(name = "keyword", required = false) String keyword) {
         WpVo wpVo = null;
         if (StringUtils.hasLength(wp)) {
@@ -137,22 +139,26 @@ public class CoachController {
         String wpString = Base64.getUrlEncoder().encodeToString(jsonString.getBytes());
         coachItemListVo.setWp(wpString);
 
-        return coachItemListVo;
+        return new Response<>(1001, coachItemListVo);
     }
 
     @RequestMapping("/coach/detail")
-    public CoachDetailsVo getCoachDetail(@RequestParam(name = "id") Long id) {
+    public Response<CoachDetailsVo> getCoachDetail(@RequestParam(name = "id") Long id) {
         CoachDetailsVo coachDetailsVo = new CoachDetailsVo();
         Coach coachInfo = coachService.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
-            return coachDetailsVo;
+            // 不存在不是错误的，用info
+            log.info("教练id：{}不存在", id);
+            return new Response<>(1001, coachDetailsVo);
         }
 
+        Long categoryId = coachInfo.getCategoryId();
         // 获取分类信息
-        Category category = categoryService.getById(coachInfo.getCategoryId());
+        Category category = categoryService.getById(categoryId);
         if (ObjectUtils.isEmpty(category)) {
-            return coachDetailsVo;
+            log.info("分类id：{}不存在", categoryId);
+            return new Response<>(1001, coachDetailsVo);
         }
 
         coachDetailsVo.setIntro(coachInfo.getIntro());
@@ -166,6 +172,6 @@ public class CoachController {
         coachDetailsVo.setCategory(category.getName());
         coachDetailsVo.setIcon(category.getPic());
 
-        return coachDetailsVo;
+        return new Response<>(1001, coachDetailsVo);
     }
 }
