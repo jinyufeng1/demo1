@@ -1,7 +1,10 @@
 package com.example.demo1.module.service;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
+import com.example.demo1.module.domain.Block;
+import com.example.demo1.module.domain.BlockType;
 import com.example.demo1.module.domain.CoachItemDTO;
 import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Coach;
@@ -146,6 +149,19 @@ public class CoachService {
         if (null != categoryId && ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
             log.error(position + "使用无效的categoryId");
             return null;
+        }
+
+
+        // 富文本类型检测
+        String intro = dto.getIntro();
+        if (null != intro) {
+            // 如果intro不是json数组字符串，这里会抛JSONException异常，运行时异常
+            List<Block> contents = JSON.parseArray(intro, Block.class);
+            for (Block content : contents) {
+                if(!BlockType.isArticleContentType(content.getType())){
+                    throw new RuntimeException("block type is error");
+                }
+            }
         }
 
         // copy

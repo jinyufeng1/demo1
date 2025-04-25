@@ -1,11 +1,13 @@
 package com.example.demo1.console.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo1.console.domain.CoachDetailsVo;
 import com.example.demo1.console.domain.CoachItemListVo;
 import com.example.demo1.console.domain.CoachItemVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.common.Response;
+import com.example.demo1.module.domain.Block;
 import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
@@ -36,10 +38,11 @@ public class CoachController {
     //新增教练信息
     @RequestMapping("/coach/add")
     public Response<Long> addCoach(@RequestParam(name = "pics", required = false) String pics,
-                             @RequestParam("name") String name,
-                             @RequestParam("categoryId") Long categoryId,
-                             @RequestParam(name = "speciality", required = false) String speciality,
-                             @RequestParam(name = "intro", required = false) String intro) {
+                                   @RequestParam("name") String name,
+                                   @RequestParam("categoryId") Long categoryId,
+                                   @RequestParam(name = "speciality", required = false) String speciality,
+                                   @RequestParam(name = "intro", required = false) String intro
+    ) {
         Long coachId = coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
         return new Response<>(1001, coachId);
     }
@@ -151,7 +154,8 @@ public class CoachController {
             return new Response<>(1001, coachDetailsVo);
         }
 
-        coachDetailsVo.setIntro(coachInfo.getIntro());
+        List<Block> contents = JSON.parseArray(coachInfo.getIntro(), Block.class);
+        coachDetailsVo.setIntro(contents);
         String pics = coachInfo.getPics();
         if (StringUtils.hasLength(pics)) {
             //不需要判断是否包含split参数，没有就不切

@@ -1,5 +1,6 @@
 package com.example.demo1.console.domain;
 
+import com.example.demo1.module.domain.Block;
 import lombok.Data;
 
 import java.util.List;
@@ -11,8 +12,7 @@ public class CoachDetailsVo {
     private List<String> pics;
 
 //    介绍
-    private String intro;
-
+    private List<Block> intro;
 //    分类
     private String category;
 

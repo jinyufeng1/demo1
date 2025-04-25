@@ -8,6 +8,7 @@ import com.example.demo1.app.domain.WpVo;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.common.Response;
+import com.example.demo1.module.domain.Block;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.service.CategoryService;
@@ -161,7 +162,9 @@ public class CoachController {
             return new Response<>(1001, coachDetailsVo);
         }
 
-        coachDetailsVo.setIntro(coachInfo.getIntro());
+        // json转成block列表
+        List<Block> contents = JSON.parseArray(coachInfo.getIntro(), Block.class);
+        coachDetailsVo.setIntro(contents);
         String pics = coachInfo.getPics();
         if (StringUtils.hasLength(pics)) {
             //不需要判断是否包含split参数，没有就不切
