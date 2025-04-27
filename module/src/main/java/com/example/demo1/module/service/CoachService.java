@@ -72,8 +72,7 @@ public class CoachService {
     public Boolean delete(Long id) {
         String position = "CoachService [public Boolean delete(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
-            log.info(position + "删除失败，目标id：{}不存在", id);
-            return false;
+            throw new RuntimeException(position + "删除失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -81,21 +80,17 @@ public class CoachService {
     }
 
     public Boolean insert(Coach coach) {
-        String position = "CoachService [public Boolean insert(Coach coach)]";
-        // 缺参数的问题是方法使用的问题，让技术人员知道就好，在程序内部打印错误日志
+        // 缺参数的问题是方法使用的问题，让用户知道程序异常就好，在程序内部打印异常信息让程序员排错
         if (null == coach) {
-            log.error(position + "插入失败，entity为空！");
-            return false;
+            throw new RuntimeException("插入失败，entity为空！");
         }
 
         if (null == coach.getName()) {
-            log.error(position + "插入失败，教练名称必填！");
-            return false;
+            throw new RuntimeException("插入失败，教练名称必填！");
         }
 
         if (null == coach.getCategoryId()) {
-            log.error(position + "插入失败，所属分类id必填！");
-            return false;
+            throw new RuntimeException("插入失败，所属分类id必填！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -105,16 +100,8 @@ public class CoachService {
     }
 
     public Boolean update(Coach coach) {
-        String position = "CoachService [public Boolean update(Coach coach)]";
         if (null == coach) {
-            log.error(position + "更新失败，entity为空！");
-            return false;
-        }
-
-        Long id = coach.getId();
-        if (ObjectUtils.isEmpty(getById(id))) {
-            log.error(position + "更新失败，目标id：{}不存在", id);
-            return false;
+            throw new RuntimeException("更新失败，entity为空！");
         }
 
         // 失去修改的意义
@@ -123,8 +110,12 @@ public class CoachService {
                 && null == coach.getSpeciality()
                 && null == coach.getIntro()
                 && null == coach.getCategoryId()) {
-            log.error(position + "更新失败，业务字段全为空");
-            return false;
+            throw new RuntimeException("更新失败，业务字段全为空！");
+        }
+
+        Long id = coach.getId();
+        if (ObjectUtils.isEmpty(getById(id))) {
+            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -138,17 +129,14 @@ public class CoachService {
      * @return
      */
     public Long edit(EditCoachDTO dto) {
-        String position = "CoachService [public Long edit(EditUserDTO dto)]";
         if (ObjectUtils.isEmpty(dto)) {
-            log.error(position + "dto对象为空对象");
-            return null;
+            throw new RuntimeException("dto对象为空对象");
         }
 
         // 分类校验
         Long categoryId = dto.getCategoryId();
         if (null != categoryId && ObjectUtils.isEmpty(categoryService.getById(categoryId))) {
-            log.error(position + "使用无效的categoryId");
-            return null;
+            throw new RuntimeException("分类id：" + categoryId + "不存在");
         }
 
 
@@ -179,11 +167,9 @@ public class CoachService {
     }
 
     public List<Coach> getByProperty(Coach entity) {
-        String position = "CoachService [public List<Coach> getByProperty(Coach entity)]";
         // 判断entity，避免无字段条件查到整张表的数据
         if (CustomUtils.isAllFieldsNull(entity)) {
-            log.warn(position + "entity参数为null或属性全为null");
-            return null;
+            throw new RuntimeException("entity参数为null或属性全为null");
         }
         return mapper.getByProperty(entity);
     }
@@ -197,7 +183,7 @@ public class CoachService {
     public Boolean deleteByProperty(Coach entity) {
         // getByProperty已经判断entity了，这里就不用加了
         if (CollectionUtils.isEmpty(getByProperty(entity))) {
-            return false;
+            throw new RuntimeException("对应属性的数据不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;

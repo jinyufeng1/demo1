@@ -38,10 +38,8 @@ public class CategoryService {
     }
 
     public Boolean delete(Long id) {
-        String position = "CategoryService [public Boolean delete(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
-            log.info(position + "删除失败，目标id：{}不存在", id);
-            return false;
+            throw new RuntimeException("删除失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -49,15 +47,12 @@ public class CategoryService {
     }
 
 	public Boolean insert(Category entity) {
-        String position = "CategoryService [public Boolean insert(Category entity)]";
         if (null == entity) {
-            log.error(position + "插入失败，entity为空！");
-            return false;
+            throw new RuntimeException("插入失败，entity为空！");
         }
 
         if (null == entity.getName()) {
-            log.error(position + "插入失败，分类名称必填！");
-            return false;
+            throw new RuntimeException("插入失败，分类名称必填！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -67,24 +62,20 @@ public class CategoryService {
     }
 
     public Boolean update(Category entity) {
-        String position = "CategoryService [public Boolean update(Category entity)]";
         if (null == entity) {
-            log.error(position + "更新失败，entity为空！");
-            return false;
-        }
-
-        Long id = entity.getId();
-        if (ObjectUtils.isEmpty(getById(id))) {
-            log.error(position + "更新失败，目标id：{}不存在", id);
-            return false;
+            throw new RuntimeException("更新失败，entity为空！");
         }
 
         // 失去修改的意义
         if (null == entity.getName()
                 && null == entity.getPic()
                 && null == entity.getParentId()) {
-            log.error(position + "更新失败，业务字段全为空");
-            return false;
+            throw new RuntimeException("更新失败，业务字段全为空！");
+        }
+
+        Long id = entity.getId();
+        if (ObjectUtils.isEmpty(getById(id))) {
+            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -110,10 +101,8 @@ public class CategoryService {
      * @return
      */
     public Long edit(EditCategoryDTO dto) {
-        String position = "CategoryService [public Long edit(EditCategoryDTO dto)]";
         if (ObjectUtils.isEmpty(dto)) {
-            log.error(position + "dto对象为空对象");
-            return null;
+            throw new RuntimeException("dto对象为空对象");
         }
 
         // 父级校验
@@ -121,8 +110,7 @@ public class CategoryService {
         if (null != parentId) {
             Category category = this.getById(parentId);
             if (ObjectUtils.isEmpty(category)) {
-                log.error(position + "使用无效的parentId");
-                return null;
+                throw new RuntimeException("父级分类id：" + parentId + "不存在");
             }
         }
 
@@ -141,10 +129,8 @@ public class CategoryService {
     }
 
     public Boolean deleteHierarchy(Long id) {
-        String position = "CategoryService [public Boolean deleteHierarchy(Long id)]";
         if (ObjectUtils.isEmpty(getById(id))) {
-            log.info(position + "删除失败，目标id：{}不存在", id);
-            return false;
+            throw new RuntimeException("删除失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
