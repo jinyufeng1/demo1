@@ -11,8 +11,10 @@ import com.example.demo1.module.domain.Block;
 import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
+import com.example.demo1.module.entity.Tag;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import com.example.demo1.module.service.RelationTagCoachService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,23 +37,26 @@ public class CoachController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private RelationTagCoachService relationTagCoachService;
+
+
     //新增教练信息
     @RequestMapping("/coach/add")
     public Response<Long> addCoach(@RequestParam(name = "pics", required = false) String pics,
                                    @RequestParam("name") String name,
                                    @RequestParam("categoryId") Long categoryId,
                                    @RequestParam(name = "speciality", required = false) String speciality,
-                                   @RequestParam(name = "intro", required = false) String intro
-    ) {
-        Long coachId = coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId));
+                                   @RequestParam(name = "intro", required = false) String intro,
+                                   @RequestParam(name = "tags", required = false) String tags) {
+        Long coachId = coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId, tags));
         return new Response<>(1001, coachId);
     }
 
     //删除教练信息
     @RequestMapping("/coach/del")
     public Response<Boolean> delCoach(@RequestParam("id") Long id) {
-        Boolean delete = coachService.delete(id);
-        return new Response<>(1001, delete);
+        return new Response<>(1001, coachService.delete(id));
     }
 
     //修改教练信息
@@ -61,8 +66,9 @@ public class CoachController {
                               @RequestParam(name = "pics", required = false) String pics,
                               @RequestParam(name = "name", required = false) String name,
                               @RequestParam(name = "speciality", required = false) String speciality,
-                              @RequestParam(name = "intro", required = false) String intro) {
-        Long coachId = coachService.edit(new EditCoachDTO(id, pics, name.trim(), speciality, intro, categoryId));
+                              @RequestParam(name = "intro", required = false) String intro,
+                              @RequestParam(name = "tags", required = false) String tags) {
+        Long coachId = coachService.edit(new EditCoachDTO(id, pics, null == name ? null : name.trim(), speciality, intro, categoryId, tags));
         return new Response<>(1001, coachId);
     }
 
@@ -165,6 +171,10 @@ public class CoachController {
 
         coachDetailsVo.setCategory(category.getName());
         coachDetailsVo.setIcon(category.getPic());
+        List<String> tags = relationTagCoachService.getTagByCoachId(coachInfo.getId())
+                .stream().map(Tag::getName).collect(Collectors.toList());
+        coachDetailsVo.setTags(tags);
+
         coachDetailsVo.setCreateTime(CustomUtils.transformTimestamp(coachInfo.getCreateTime() * 1000L, Constant.DATE_PATTERN_1));
         coachDetailsVo.setUpdateTime(CustomUtils.transformTimestamp(coachInfo.getUpdateTime() * 1000L, Constant.DATE_PATTERN_1));
         return new Response<>(1001, coachDetailsVo);

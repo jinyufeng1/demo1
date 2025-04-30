@@ -30,16 +30,24 @@ public class CategoryService {
 
 //    **************************五大基础方法**************************
 	public Category getById(Long id) {
+        if (null == id) {
+            throw new RuntimeException("查询失败，id为空！");
+        }
+
         return mapper.getById(id);
     }
 
     public Category extractById(Long id) {
+        if (null == id) {
+            throw new RuntimeException("查询失败，id为空！");
+        }
+
         return mapper.extractById(id);
     }
 
     public Boolean delete(Long id) {
-        if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("删除失败，目标id：" + id + "不存在");
+        if (null == id) {
+            throw new RuntimeException("软删除失败，id为空！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -52,7 +60,7 @@ public class CategoryService {
         }
 
         if (null == entity.getName()) {
-            throw new RuntimeException("插入失败，分类名称必填！");
+            throw new RuntimeException("插入失败，name必填！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -66,16 +74,15 @@ public class CategoryService {
             throw new RuntimeException("更新失败，entity为空！");
         }
 
+        if (null == entity.getId()) {
+            throw new RuntimeException("更新失败，id为空！");
+        }
+
         // 失去修改的意义
         if (null == entity.getName()
                 && null == entity.getPic()
                 && null == entity.getParentId()) {
             throw new RuntimeException("更新失败，业务字段全为空！");
-        }
-
-        Long id = entity.getId();
-        if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -102,7 +109,7 @@ public class CategoryService {
      */
     public Long edit(EditCategoryDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("dto对象为空对象");
+            throw new RuntimeException("dto对象为空");
         }
 
         // 父级校验
@@ -110,7 +117,7 @@ public class CategoryService {
         if (null != parentId) {
             Category category = this.getById(parentId);
             if (ObjectUtils.isEmpty(category)) {
-                throw new RuntimeException("父级分类id：" + parentId + "不存在");
+                throw new RuntimeException("parentId：" + parentId + "不存在");
             }
         }
 
@@ -129,10 +136,6 @@ public class CategoryService {
     }
 
     public Boolean deleteHierarchy(Long id) {
-        if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("删除失败，目标id：" + id + "不存在");
-        }
-
         long timestamp = System.currentTimeMillis() / 1000;
         return 0 < mapper.deleteHierarchy(id, (int)timestamp);
     }

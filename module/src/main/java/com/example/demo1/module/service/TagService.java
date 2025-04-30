@@ -1,27 +1,32 @@
-package ${package.Service};
+package com.example.demo1.module.service;
 
-import ${package.Entity}.${entity};
-import ${package.Mapper}.${table.mapperName};
+import com.example.demo1.module.entity.Tag;
+import com.example.demo1.module.mapper.TagMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
+
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
- * ${table.comment!} 服务类
+ * 标签信息表 服务类
  * </p>
  *
- * @author ${author}
- * @since ${date}
+ * @author 我叫小呆呆
+ * @since 2025-04-28
  */
 @Service
-public class ${table.serviceName} {
+public class TagService {
 
     @Resource
-    private ${table.mapperName} mapper;
+    private TagMapper mapper;
+
+    public List<Tag> getByNames(List<String> names) {
+        return mapper.getByNames(names);
+    }
 
 //    **************************五大基础方法**************************
-	public ${entity} getById(Long id) {
+	public Tag getById(Long id) {
         if (null == id) {
             throw new RuntimeException("查询失败，id为空！");
         }
@@ -29,7 +34,7 @@ public class ${table.serviceName} {
         return mapper.getById(id);
     }
 
-    public ${entity} extractById(Long id) {
+    public Tag extractById(Long id) {
         if (null == id) {
             throw new RuntimeException("查询失败，id为空！");
         }
@@ -46,12 +51,14 @@ public class ${table.serviceName} {
         return 1 == mapper.delete(id, (int)timestamp);
     }
 
-	public Boolean insert(${entity} entity) {
+	public Boolean insert(Tag entity) {
         if (null == entity) {
             throw new RuntimeException("插入失败，entity为空！");
         }
 
-        // todo 必填字段判断
+        if (null == entity.getName()) {
+            throw new RuntimeException("插入失败，name必填！");
+        }
 
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setCreateTime((int)timestamp);
@@ -59,7 +66,7 @@ public class ${table.serviceName} {
         return 1 == mapper.insert(entity);
     }
 
-    public Boolean update(${entity} entity) {
+    public Boolean update(Tag entity) {
         if (null == entity) {
             throw new RuntimeException("更新失败，entity为空！");
         }
@@ -68,7 +75,9 @@ public class ${table.serviceName} {
             throw new RuntimeException("更新失败，id为空！");
         }
 
-        // todo 业务字段判断 另外还要考虑这张表有没有关联表要更新
+        if (null == entity.getName()) {
+            throw new RuntimeException("更新失败，业务字段全为空！");
+        }
 
         long timestamp = System.currentTimeMillis() / 1000;
         entity.setUpdateTime((int)timestamp);

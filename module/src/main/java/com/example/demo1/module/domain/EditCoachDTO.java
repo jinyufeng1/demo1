@@ -15,4 +15,5 @@ public class EditCoachDTO {
     private String speciality;
     private String intro;
     private Long categoryId;
+    private String tags;
 }

@@ -30,16 +30,24 @@ public class UserService {
 
 //    **************************五大基础方法**************************
 	public User getById(Long id) {
+        if (null == id) {
+            throw new RuntimeException("查询失败，id为空！");
+        }
+
         return mapper.getById(id);
     }
 
     public User extractById(Long id) {
+        if (null == id) {
+            throw new RuntimeException("查询失败，id为空！");
+        }
+
         return mapper.extractById(id);
     }
 
     public Boolean delete(Long id) {
-        if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("删除失败，目标id：" + id + "不存在");
+        if (null == id) {
+            throw new RuntimeException("软删除失败，id为空！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -53,18 +61,12 @@ public class UserService {
         }
 
         if (null == entity.getPassword()) {
-            throw new RuntimeException("插入失败，密码必填！");
+            throw new RuntimeException("插入失败，password必填！");
         }
 
         String phone = entity.getPhone();
         if (null == phone) {
-            throw new RuntimeException("插入失败，手机号必填！");
-        }
-
-        // 手机号重复的问题是业务问题，应该让用户知道，所以抛出去
-        User user = getByPhone(phone);
-        if (null != user) {
-            throw new CustomException(2002);
+            throw new RuntimeException("插入失败，phone必填！");
         }
 
         long timestamp = System.currentTimeMillis() / 1000;
@@ -80,11 +82,7 @@ public class UserService {
 
         Long id = entity.getId();
         if (null == id) {
-            throw new RuntimeException("更新失败，目标id为空！");
-        }
-
-        if (ObjectUtils.isEmpty(getById(id))) {
-            throw new RuntimeException("更新失败，目标id：" + id + "不存在");
+            throw new RuntimeException("更新失败，id为空！");
         }
 
         // 失去修改的意义
@@ -102,7 +100,7 @@ public class UserService {
 
     public User getByPhone(String phone) {
         if (!StringUtils.hasLength(phone)) {
-            throw new RuntimeException("参数phone为空");
+            throw new RuntimeException("phone为空");
         }
         return mapper.getByPhone(phone);
     }
@@ -115,7 +113,16 @@ public class UserService {
      */
     public Long edit(EditUserDTO dto) {
         if (ObjectUtils.isEmpty(dto)) {
-            throw new RuntimeException("dto对象为空对象");
+            throw new RuntimeException("dto对象为空");
+        }
+
+        String phone = dto.getPhone();
+        if (null != phone) {
+            // 手机号重复的问题是业务问题，应该让用户知道，所以抛出去
+            User user = getByPhone(phone);
+            if (null != user) {
+                throw new CustomException(2002);
+            }
         }
 
         String password = dto.getPassword();
@@ -127,6 +134,7 @@ public class UserService {
         // copy
         User user = new User();
         BeanUtils.copyProperties(dto, user);
+
         Boolean result;
         // id校验
         if (ObjectUtils.isEmpty(user.getId())) {

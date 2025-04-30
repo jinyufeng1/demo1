@@ -19,4 +19,7 @@ public class CoachDetailsVo {
 
 //    分类图标
     private String icon;
+
+//    标签
+    private List<String> tags;
 }

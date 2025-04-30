@@ -11,8 +11,11 @@ import com.example.demo1.module.common.Response;
 import com.example.demo1.module.domain.Block;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
+import com.example.demo1.module.entity.Tag;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
+import com.example.demo1.module.service.RelationTagCoachService;
+import com.example.demo1.module.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class CoachController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private RelationTagCoachService relationTagCoachService;
 
     @RequestMapping("/coach/list")
     public Response<CoachItemListVo> getCoachList(@RequestParam(name = "wp", required = false) String wp,
@@ -174,7 +180,9 @@ public class CoachController {
 
         coachDetailsVo.setCategory(category.getName());
         coachDetailsVo.setIcon(category.getPic());
-
+        List<String> tags = relationTagCoachService.getTagByCoachId(coachInfo.getId())
+                .stream().map(Tag::getName).collect(Collectors.toList());
+        coachDetailsVo.setTags(tags);
         return new Response<>(1001, coachDetailsVo);
     }
 }
