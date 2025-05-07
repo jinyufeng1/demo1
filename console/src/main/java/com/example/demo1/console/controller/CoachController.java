@@ -12,6 +12,7 @@ import com.example.demo1.module.domain.EditCoachDTO;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
 import com.example.demo1.module.entity.Tag;
+import com.example.demo1.module.redis.RedisService;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import com.example.demo1.module.service.RelationTagCoachService;
@@ -40,6 +41,9 @@ public class CoachController {
     @Autowired
     private RelationTagCoachService relationTagCoachService;
 
+    @Autowired
+    private RedisService redisService;
+
 
     //新增教练信息
     @RequestMapping("/coach/add")
@@ -49,14 +53,24 @@ public class CoachController {
                                    @RequestParam(name = "speciality", required = false) String speciality,
                                    @RequestParam(name = "intro", required = false) String intro,
                                    @RequestParam(name = "tags", required = false) String tags) {
-        Long coachId = coachService.edit(new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId, tags));
+        EditCoachDTO editCoachDTO = new EditCoachDTO(null, pics, name.trim(), speciality, intro, categoryId, tags);
+        Long coachId = coachService.edit(editCoachDTO);
+        // 为保证一致性而删除
+        if (null != coachId) {
+            redisService.deleteKeysWithPrefix("list_");
+        }
         return new Response<>(1001, coachId);
     }
 
     //删除教练信息
     @RequestMapping("/coach/del")
     public Response<Boolean> delCoach(@RequestParam("id") Long id) {
-        return new Response<>(1001, coachService.delete(id));
+        Boolean result = coachService.delete(id);
+        // 为保证一致性而删除
+        if (result) {
+            redisService.deleteKeysWithPrefix("list_");
+        }
+        return new Response<>(1001, result);
     }
 
     //修改教练信息

@@ -23,6 +23,7 @@
         <module>module</module>
         <module>codegenerator</module>
         <module>file</module>
+        <module>message</module>
     </modules>
 
     <properties>

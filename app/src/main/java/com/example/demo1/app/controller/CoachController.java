@@ -1,10 +1,13 @@
 package com.example.demo1.app.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.example.demo1.app.domain.CoachDetailsVo;
 import com.example.demo1.app.domain.CoachItemListVo;
 import com.example.demo1.app.domain.CoachItemVo;
 import com.example.demo1.app.domain.WpVo;
+import com.example.demo1.module.redis.RedisService;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.CustomUtils;
 import com.example.demo1.module.common.Response;
@@ -15,7 +18,6 @@ import com.example.demo1.module.entity.Tag;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import com.example.demo1.module.service.RelationTagCoachService;
-import com.example.demo1.module.service.TagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class CoachController {
     @Autowired
     private RelationTagCoachService relationTagCoachService;
 
+    @Autowired
+    private RedisService redisService;
+
     @RequestMapping("/coach/list")
     public Response<CoachItemListVo> getCoachList(@RequestParam(name = "wp", required = false) String wp,
                                                  @RequestParam(name = "keyword", required = false) String keyword) {
@@ -54,36 +59,53 @@ public class CoachController {
         }
 
         CoachItemListVo coachItemListVo = new CoachItemListVo();
-        // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
-        List<Coach> pageList = coachService.getPageList(null == wpVo ? 1 : wpVo.getPage(), null == wpVo ? keyword : wpVo.getKeyword());
-        if (pageList.isEmpty()) {
-            coachItemListVo.setIsEnd(true);
-            return new Response<>(1001, coachItemListVo);
+        int page = null == wpVo ? 1 : wpVo.getPage();
+        keyword = null == wpVo ? keyword : wpVo.getKeyword();
+        String redisKey = "list_" + page + (null == keyword ? "" : "_" + keyword);
+        List<CoachItemVo> list;
+        // 判断缓存是否存在
+        if (redisService.hasKey(redisKey)) {
+            String jsonString = redisService.get(redisKey);
+            list = JSONArray.parseArray(jsonString, CoachItemVo.class);
         }
-
-        // 没有取全表，而是根据id进行in条件查询
-        Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
-
-        // 获取分类映射列表
-        Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
-
-        // vo就是再controller层做转换
-        List<CoachItemVo> list = new ArrayList<>();
-        for (Coach coach : pageList) {
-            String category = categoryMap.get(coach.getCategoryId());
-            if (null == category) {
-                continue;
+        // 去数据库里取
+        else {
+            // 如果没有数据，getCoachList会拿到一个空的ArrayList对象
+            List<Coach> pageList = coachService.getPageList(page, keyword);
+            if (pageList.isEmpty()) {
+                coachItemListVo.setIsEnd(true);
+                return new Response<>(1001, coachItemListVo);
             }
 
-            CoachItemVo coachItemVo = new CoachItemVo();
-            coachItemVo.setCategory(category);
-            BeanUtils.copyProperties(coach, coachItemVo);
-            String pics = coach.getPics();
-            //不需要判断是否包含split参数，没有就不切
-            String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-            coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
-            list.add(coachItemVo);
+            // 没有取全表，而是根据id进行in条件查询
+            Set<Long> categoryIds = pageList.stream().map(Coach::getCategoryId).collect(Collectors.toSet());
+
+            // 获取分类映射列表
+            Map<Long, String> categoryMap = categoryService.getList(null, categoryIds, null).stream().collect(Collectors.toMap(Category::getId, Category::getName));
+
+            // vo就是再controller层做转换
+            list = new ArrayList<>();
+            for (Coach coach : pageList) {
+                String category = categoryMap.get(coach.getCategoryId());
+                if (null == category) {
+                    continue;
+                }
+
+                CoachItemVo coachItemVo = new CoachItemVo();
+                coachItemVo.setCategory(category);
+                BeanUtils.copyProperties(coach, coachItemVo);
+                String pics = coach.getPics();
+                //不需要判断是否包含split参数，没有就不切
+                String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
+                coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
+                list.add(coachItemVo);
+            }
+
+            // json存入redis 过期时间60秒
+            String jsonString = JSON.toJSONString(list, SerializerFeature.IgnoreNonFieldGetter);
+            redisService.setWithExpire(redisKey, jsonString, 60);
         }
+
         coachItemListVo.setList(list);
         coachItemListVo.setIsEnd(list.size() < Constant.PAGE_SIZE);
 
