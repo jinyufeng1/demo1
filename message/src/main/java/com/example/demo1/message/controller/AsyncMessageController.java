@@ -1,5 +1,6 @@
 package com.example.demo1.message.controller;
 
+import com.example.demo1.message.crond.AsyncMessageTaskCrond;
 import com.example.demo1.module.entity.MessageTask;
 import com.example.demo1.module.service.MessageTaskService;
 import com.example.demo1.module.common.Response;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @RestController
 @RequestMapping("/async")
@@ -28,7 +28,7 @@ public class AsyncMessageController {
     public Response<Boolean> asynSendCodeSingle(@RequestParam("phone") String phone) {
         MessageTask messageTask = new MessageTask();
         messageTask.setPhone(phone);
-        messageTask.setStatus(0);
+        messageTask.setStatus(AsyncMessageTaskCrond.TaskStatus.UNTREATED.getStatus());
         messageTaskService.insert(messageTask);
         return new Response<>(1001, true);
     }
@@ -43,19 +43,12 @@ public class AsyncMessageController {
         ExecutorService executorService = Executors.newCachedThreadPool();
         CountDownLatch countDownLatch = new CountDownLatch(phones.size());
 
-        AtomicBoolean ret = new AtomicBoolean(true);
         for (String phone : phones) {
             executorService.execute(() -> {
-                try {
-                    MessageTask messageTask = new MessageTask();
-                    messageTask.setPhone(phone);
-                    messageTask.setStatus(0);
-                    messageTaskService.insert(messageTask);
-                }
-                catch (Exception e) {
-                    ret.set(false);
-                    e.printStackTrace();
-                }
+                MessageTask messageTask = new MessageTask();
+                messageTask.setPhone(phone);
+                messageTask.setStatus(AsyncMessageTaskCrond.TaskStatus.UNTREATED.getStatus());
+                messageTaskService.insert(messageTask);
                 countDownLatch.countDown();
             });
         }
@@ -68,6 +61,6 @@ public class AsyncMessageController {
         }
         executorService.shutdown();
 
-        return new Response<>(1001, ret.get());
+        return new Response<>(1001, true);
     }
 }

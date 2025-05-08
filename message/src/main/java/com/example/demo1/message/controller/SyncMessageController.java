@@ -27,7 +27,10 @@ public class SyncMessageController {
     public Response<Boolean> sendCodeSingle(@RequestParam("phone") String phone) {
         try {
             String code = messageService.sendCode(phone);
-            return new Response<>(1001, "OK".equals(code));
+            if (!"OK".equals(code)) {
+                return new Response<>(2003);
+            }
+            return new Response<>(1001, true);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -45,17 +48,17 @@ public class SyncMessageController {
         ExecutorService executorService = Executors.newCachedThreadPool();
         CountDownLatch countDownLatch = new CountDownLatch(phones.size());
 
-        AtomicBoolean ret = new AtomicBoolean(true);
+        AtomicBoolean ret = new AtomicBoolean(false);
         for (String phone : phones) {
             executorService.execute(() -> {
                 try {
                     String code = messageService.sendCode(phone);
                     if (!"OK".equals(code)) {
-                        ret.set(false);
+                        // 目前只要有一个成功就算发送成功
+                        ret.set(true);
                     }
                 }
                 catch (Exception e) {
-                    ret.set(false);
                     e.printStackTrace();
                 }
                 countDownLatch.countDown();
@@ -70,6 +73,10 @@ public class SyncMessageController {
         }
         executorService.shutdown();
 
-        return new Response<>(1001, ret.get());
+        if (!ret.get()) {
+            return new Response<>(2003);
+        }
+
+        return new Response<>(1001, true);
     }
 }
