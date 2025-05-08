@@ -25,13 +25,15 @@ public class MessageService {
                 .setTemplateParam(content);
         SendSmsResponse sendSmsResponse = client.sendSms(sendSmsRequest);
         SendSmsResponseBody body = sendSmsResponse.getBody();
+        String code = body.getCode();
         // 记录到数据表
         MessageRecord messageRecord = new MessageRecord();
         messageRecord.setPhone(phone);
         messageRecord.setContent(content);
-        messageRecord.setCode(body.getCode());
+        messageRecord.setCode(code);
         messageRecord.setReason(body.getMessage());
+
         messageRecordService.insert(messageRecord);
-        return body.getCode();
+        return code;
     }
 }

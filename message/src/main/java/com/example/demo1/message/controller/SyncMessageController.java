@@ -26,8 +26,8 @@ public class SyncMessageController {
     @RequestMapping("/send/code/single")
     public Response<Boolean> sendCodeSingle(@RequestParam("phone") String phone) {
         try {
-            messageService.sendCode(phone);
-            return new Response<>(1001, true);
+            String code = messageService.sendCode(phone);
+            return new Response<>(1001, "OK".equals(code));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -49,7 +49,10 @@ public class SyncMessageController {
         for (String phone : phones) {
             executorService.execute(() -> {
                 try {
-                    messageService.sendCode(phone);
+                    String code = messageService.sendCode(phone);
+                    if (!"OK".equals(code)) {
+                        ret.set(false);
+                    }
                 }
                 catch (Exception e) {
                     ret.set(false);
