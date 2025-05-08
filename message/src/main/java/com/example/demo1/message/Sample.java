@@ -19,7 +19,7 @@ public class Sample {
                 // 私密信息不能上传到github
                 .setAccessKeyId("")
                 .setAccessKeySecret("")
-                .setEndpoint("");
+                .setEndpoint("dysmsapi.aliyuncs.com");
         return new Client(config);
     }
 

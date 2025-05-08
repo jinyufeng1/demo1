@@ -19,8 +19,28 @@ public class AsyncMessageTaskCrond {
     @Autowired
     private MessageService messageService;
 
+    public enum TaskStatus {
+        // 定义任务状态常量
+        UNTREATED(0), // 等待处理的任务
+        SUCCEED(1), // 处理成功的任务
+        FAIL(2); // 处理失败的任务
+
+        // 成员变量，用于存储状态的描述
+        private final Integer status;
+
+        // 构造函数，私有化构造函数，防止外部实例化
+        TaskStatus(Integer status) {
+            this.status = status;
+        }
+
+        // 提供一个方法来获取状态的描述
+        public Integer getStatus() {
+            return status;
+        }
+    }
+
     private void doTask(MessageTask task) {
-        Integer code = 0;
+        String code = "";
         try {
             code = messageService.sendCode(task.getPhone());
         }
@@ -29,12 +49,12 @@ public class AsyncMessageTaskCrond {
         }
 
         // 发送成功
-        if (200 == code) {
-            task.setStatus(1);
+        if ("OK".equals(code)) {
+            task.setStatus(TaskStatus.SUCCEED.getStatus());
         }
         // 发送失败
         else {
-            task.setStatus(2);
+            task.setStatus(TaskStatus.FAIL.getStatus());
         }
         messageTaskService.update(task);
     }
@@ -42,7 +62,7 @@ public class AsyncMessageTaskCrond {
     // 每10秒执行一次
     @Scheduled(fixedDelay = 10000)
     public void fixedDelayJob() {
-        List<MessageTask> tasks = messageTaskService.getByStatus(0);
+        List<MessageTask> tasks = messageTaskService.getByStatus(TaskStatus.UNTREATED.getStatus());
         int size = tasks.size();
         if (0 == size) {
             return;

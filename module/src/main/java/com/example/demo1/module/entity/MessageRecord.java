@@ -15,7 +15,7 @@ public class MessageRecord {
     private Long id;
     private String phone;
     private String content;
-    private Integer code;
+    private String code;
     private String reason;
     private Integer createTime;
     private Integer updateTime;
