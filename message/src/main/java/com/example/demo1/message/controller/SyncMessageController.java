@@ -33,7 +33,8 @@ public class SyncMessageController {
             return new Response<>(1001, true);
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return new Response<>(2003);
         }
     }
 

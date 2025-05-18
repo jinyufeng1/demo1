@@ -1,5 +1,6 @@
 package com.example.demo1.console.controller;
 
+import com.example.demo1.console.common.CategoryTree;
 import com.example.demo1.console.domain.CategoryItemListVo;
 import com.example.demo1.module.common.Response;
 import com.example.demo1.module.domain.EditCategoryDTO;
@@ -51,6 +52,6 @@ public class CategoryController {
     @RequestMapping("/category/ntree")
     public Response<CategoryItemListVo> getCategoryTree() {
         List<Category> list = categoryService.getList(null, null, null);
-        return new Response<>(1001, CategoryItemListVo.getCategoryTree(list));
+        return new Response<>(1001, CategoryTree.getCategoryTree(list));
     }
 }

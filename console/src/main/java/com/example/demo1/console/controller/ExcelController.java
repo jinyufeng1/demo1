@@ -1,12 +1,12 @@
 package com.example.demo1.console.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.example.demo1.console.common.CategoryTree;
 import com.example.demo1.console.domain.CategoryItemListVo;
 import com.example.demo1.module.common.ExcelDataListener;
 import com.example.demo1.module.common.Response;
 import com.example.demo1.module.entity.Category;
 import com.example.demo1.module.entity.Coach;
-import com.example.demo1.module.exception.CustomException;
 import com.example.demo1.module.service.CategoryService;
 import com.example.demo1.module.service.CoachService;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +82,7 @@ public class ExcelController {
     public Response<CategoryItemListVo> parseData(MultipartFile file) {
         String contentType = file.getContentType();
         if (!"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
-            throw new CustomException(5001);
+            return new Response<>(5001);
         }
 
         InputStream inputStream;
@@ -90,14 +90,15 @@ public class ExcelController {
             inputStream = file.getInputStream();
         }
         catch (Exception exception) {
-            throw new RuntimeException(exception);
+            exception.printStackTrace();
+            return new Response<>(3001);
         }
 
         ExcelDataListener<Category> listener = new ExcelDataListener<>();
         EasyExcel.read(inputStream, Category.class, listener).sheet().doRead();
         List<Category> dataList = listener.getDataList();
 
-        return new Response<>(1001, CategoryItemListVo.getCategoryTree(dataList));
+        return new Response<>(1001, CategoryTree.getCategoryTree(dataList));
     }
 
     private void zipFolder(File file, ZipOutputStream zos, String parentFolder) throws IOException {

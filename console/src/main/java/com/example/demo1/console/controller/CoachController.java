@@ -95,7 +95,7 @@ public class CoachController {
         int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
         if (0 == coachTotal) {
-            log.info("console CoachController 总数都为0就不用查了，节约数据库访问");
+            log.info("总数都为0就不用查了，节约数据库访问");
             return new Response<>(1001, coachItemListVo);
         }
 
@@ -141,7 +141,7 @@ public class CoachController {
         int coachTotal = coachService.count(keyword);
         coachItemListVo.setTotal(coachTotal);
         if (0 == coachTotal) {
-            log.info("console CoachController 总数都为0就不用查了，节约数据库访问");
+            log.info("总数都为0就不用查了，节约数据库访问");
             return new Response<>(1001, coachItemListVo);
         }
 
@@ -162,7 +162,7 @@ public class CoachController {
         Coach coachInfo = coachService.getById(id);
         //自己写方法判断
         if (ObjectUtils.isEmpty(coachInfo)) {
-            log.info("console CoachController 教练id：{}不存在", id);
+            log.info("教练id：{}不存在", id);
             return new Response<>(1001, coachDetailsVo);
         }
 
@@ -170,7 +170,7 @@ public class CoachController {
         // 获取分类信息
         Category category = categoryService.getById(categoryId);
         if (ObjectUtils.isEmpty(category)) {
-            log.info("console CoachController 分类id：{}不存在", categoryId);
+            log.info("分类id：{}不存在", categoryId);
             return new Response<>(1001, coachDetailsVo);
         }
 

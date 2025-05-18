@@ -35,7 +35,7 @@ public class CategoryController {
         List<Category> firstList = categoryService.getFirstList(keyword); // 一级分类
 
         if (firstList.isEmpty()) {
-            log.info("app CategoryController 无一级分类信息");
+            log.info("无一级分类信息");
             return new Response<>(1001, categoryItemListVo);
         }
         List<Long> parentIds = firstList.stream().map(Category::getId).collect(Collectors.toList());

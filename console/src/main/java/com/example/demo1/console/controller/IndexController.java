@@ -69,7 +69,8 @@ public class IndexController {
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return new Response<>(3001);
         }
 
         IndexVo ret = new IndexVo();
