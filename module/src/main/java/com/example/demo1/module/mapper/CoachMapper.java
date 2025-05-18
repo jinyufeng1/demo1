@@ -2,6 +2,7 @@ package com.example.demo1.module.mapper;
 
 import com.example.demo1.module.domain.CoachItemDTO;
 import com.example.demo1.module.entity.Coach;
+import com.example.demo1.module.msconfig.DataSource;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -20,26 +21,32 @@ public interface CoachMapper {
 //        "</script>"
 //    )
 //    @Select("select * from coach WHERE is_deleted = 0 order by id limit #{index}, #{pageSize}")
+    @DataSource("slave")
     List<Coach> getPageList(@Param("index") int index,
                             @Param("pageSize") int pageSize,
                             @Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
 
+    @DataSource("slave")
     List<CoachItemDTO> getPageListLinkTable(@Param("index") int index,
                                             @Param("pageSize") int pageSize,
                                             @Param("keyword") String keyword);
 
+    @DataSource("slave")
     List<CoachItemDTO> getPageListLinkTable2(@Param("index") int index,
                                       @Param("pageSize") int pageSize,
                                       @Param("leafCategoryIds") List<Long> leafCategoryIds);
 
 
     //    @Select("select count(*) from coach WHERE is_deleted = 0")
+    @DataSource("slave")
     int count(@Param("keyword") String keyword, @Param("orCategoryIds") String orCategoryIds);
 
 //    **************************五大基础方法**************************
+    @DataSource("slave")
     @Select("select * from coach WHERE id = #{id} and is_deleted = 0")
     Coach getById(@Param("id") Long id);
 
+    @DataSource("slave")
     @Select("select * from coach WHERE id = #{id}")
     Coach extractById(@Param("id") Long id);
 
@@ -63,6 +70,7 @@ public interface CoachMapper {
 //    todo 尝试@UpdateProvider
     int update(@Param("entity") Coach entity);
 
+    @DataSource("slave")
     List<Coach> getByProperty(@Param("entity") Coach entity);
 
     int deleteByProperty(@Param("entity") Coach entity, @Param("timestamp") Integer timestamp);

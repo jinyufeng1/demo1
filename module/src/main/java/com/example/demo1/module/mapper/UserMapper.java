@@ -1,6 +1,7 @@
 package com.example.demo1.module.mapper;
 
 import com.example.demo1.module.entity.User;
+import com.example.demo1.module.msconfig.DataSource;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -15,9 +16,11 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface UserMapper {
 //    **************************五大基础方法**************************
+	@DataSource("slave")
 	@Select("select * from user WHERE id = #{id} and is_deleted = 0")
 	User getById(@Param("id") Long id);
-	
+
+	@DataSource("slave")
 	@Select("select * from user WHERE id = #{id}")
 	User extractById(@Param("id") Long id);
 	
@@ -28,5 +31,6 @@ public interface UserMapper {
 	
 	int update(@Param("entity") User entity);
 
+	@DataSource("slave")
 	User getByPhone(@Param("phone") String phone);
 }

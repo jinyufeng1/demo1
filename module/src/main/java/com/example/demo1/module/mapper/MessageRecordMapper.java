@@ -1,6 +1,7 @@
 package com.example.demo1.module.mapper;
 
 import com.example.demo1.module.entity.MessageRecord;
+import com.example.demo1.module.msconfig.DataSource;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -15,9 +16,11 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface MessageRecordMapper {
 //    **************************五大基础方法**************************
+	@DataSource("slave")
 	@Select("select * from message_record WHERE id = #{id} and is_deleted = 0")
 	MessageRecord getById(@Param("id") Long id);
-	
+
+	@DataSource("slave")
 	@Select("select * from message_record WHERE id = #{id}")
 	MessageRecord extractById(@Param("id") Long id);
 	

@@ -46,6 +46,7 @@ public class AsyncMessageTaskCrond {
         }
         catch (Exception e) {
             e.printStackTrace();
+            task.setStatus(TaskStatus.FAIL.getStatus());
         }
 
         // 发送成功

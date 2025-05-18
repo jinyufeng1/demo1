@@ -2,6 +2,7 @@ package com.example.demo1.module.mapper;
 
 import com.example.demo1.module.entity.RelationTagCoach;
 import com.example.demo1.module.entity.Tag;
+import com.example.demo1.module.msconfig.DataSource;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -18,9 +19,11 @@ import java.util.List;
  */
 public interface RelationTagCoachMapper {
 //    **************************五大基础方法**************************
+	@DataSource("slave")
 	@Select("select * from relation_tag_coach WHERE id = #{id} and is_deleted = 0")
 	RelationTagCoach getById(@Param("id") Long id);
-	
+
+	@DataSource("slave")
 	@Select("select * from relation_tag_coach WHERE id = #{id}")
 	RelationTagCoach extractById(@Param("id") Long id);
 	
@@ -31,6 +34,7 @@ public interface RelationTagCoachMapper {
 	
 	int update(@Param("entity") RelationTagCoach entity);
 
+	@DataSource("slave")
 	List<Tag> getTagByCoachId(Long coachId);
 
 	int deleteByCoachId(@Param("coachId") Long coachId, @Param("tagIds") List<Long> tagIds, @Param("timestamp") Integer timestamp);

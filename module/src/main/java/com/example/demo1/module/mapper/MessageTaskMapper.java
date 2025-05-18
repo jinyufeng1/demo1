@@ -1,6 +1,7 @@
 package com.example.demo1.module.mapper;
 
 import com.example.demo1.module.entity.MessageTask;
+import com.example.demo1.module.msconfig.DataSource;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -16,13 +17,16 @@ import java.util.List;
  * @since 2025-05-07
  */
 public interface MessageTaskMapper {
+	@DataSource("slave")
 	@Select("select * from message_task WHERE status = #{status} and is_deleted = 0")
 	List<MessageTask> getByStatus(@Param("status") Integer status);
 
 //    **************************五大基础方法**************************
+	@DataSource("slave")
 	@Select("select * from message_task WHERE id = #{id} and is_deleted = 0")
 	MessageTask getById(@Param("id") Long id);
-	
+
+	@DataSource("slave")
 	@Select("select * from message_task WHERE id = #{id}")
 	MessageTask extractById(@Param("id") Long id);
 	

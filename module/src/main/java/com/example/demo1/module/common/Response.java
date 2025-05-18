@@ -28,6 +28,8 @@ public class Response<T> {
 
         put(4003, "权限不足");
         put(4004, "网络繁忙");
+
+        put(5001, "解析失败，上传文件非excel文件");
     }};
 
     public Response(Integer code) {
