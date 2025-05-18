@@ -15,9 +15,11 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface ${table.mapperName} {
 //    **************************五大基础方法**************************
+	@DataSource("slave")
 	@Select("select * from ${table.name} WHERE id = <#noparse>#</#noparse>{id} and is_deleted = 0")
 	${entity} getById(@Param("id") Long id);
-	
+
+	@DataSource("slave")
 	@Select("select * from ${table.name} WHERE id = <#noparse>#</#noparse>{id}")
 	${entity} extractById(@Param("id") Long id);
 	
