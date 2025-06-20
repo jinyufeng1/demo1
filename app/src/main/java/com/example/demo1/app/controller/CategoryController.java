@@ -1,7 +1,7 @@
 package com.example.demo1.app.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.example.demo1.app.common.CustomUtils;
+import com.example.demo1.app.common.ImageVoUtils;
 import com.example.demo1.app.domain.*;
 import com.example.demo1.module.common.Constant;
 import com.example.demo1.module.common.Response;
@@ -127,7 +127,7 @@ public class CategoryController {
                     String pics = e.getPics();
                     //不需要判断是否包含split参数，没有就不切
                     String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(CustomUtils.transformObj(pic));
+                    coachItemVo.setPic(ImageVoUtils.transformObj(pic));
                     return coachItemVo;
                 }).collect(Collectors.toList());
 

@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CustomUtils {
+public class ImageVoUtils {
     public static ImageVo transformObj(String pic) {
         if (!StringUtils.hasLength(pic)) {
             return null;

@@ -26,6 +26,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
+            <!--从 1.2.21 版本 开始，ConfigTools 类中的 main 方法被移除, 密码加密不能用 java -cp druid-1.2.21.jar com.alibaba.druid.filter.config.ConfigTools 123456-->
             <version>1.2.20</version>
         </dependency>
 <!--        数据库密码加密-->

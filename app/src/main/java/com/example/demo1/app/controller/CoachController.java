@@ -3,6 +3,7 @@ package com.example.demo1.app.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.example.demo1.app.common.ImageVoUtils;
 import com.example.demo1.app.domain.CoachDetailsVo;
 import com.example.demo1.app.domain.CoachItemListVo;
 import com.example.demo1.app.domain.CoachItemVo;
@@ -97,7 +98,7 @@ public class CoachController {
                 String pics = coach.getPics();
                 //不需要判断是否包含split参数，没有就不切
                 String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
+                coachItemVo.setPic(ImageVoUtils.transformObj(pic));
                 list.add(coachItemVo);
             }
 
@@ -147,7 +148,7 @@ public class CoachController {
                     String pics = e.getPics();
                     //不需要判断是否包含split参数，没有就不切
                     String pic = StringUtils.hasLength(pics) ? pics.split(Constant.PIC_SPLIT)[0] : null;
-                    coachItemVo.setPic(com.example.demo1.app.common.CustomUtils.transformObj(pic));
+                    coachItemVo.setPic(ImageVoUtils.transformObj(pic));
                     return coachItemVo;
                 }).collect(Collectors.toList());
         coachItemListVo.setList(list);

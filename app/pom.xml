@@ -32,9 +32,10 @@
 		</dependency>
 	</dependencies>
 
-	<!--打包-->
+
 	<build>
 		<plugins>
+			<!--springboot 二次打包 内嵌tomcat-->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

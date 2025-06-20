@@ -1,6 +1,5 @@
 package com.example.demo1.app;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,9 +18,9 @@ class AppApplicationTests {
 
 	@Test
 	void test() {
-		DruidDataSource druidDataSource = (DruidDataSource) dataSource;
-		System.out.println("最大连接数：" + druidDataSource.getMaxActive());
-		System.out.println("初始化连接数：" + druidDataSource.getInitialSize());
+//		DruidDataSource druidDataSource = (DruidDataSource) dataSource;
+//		System.out.println("最大连接数：" + druidDataSource.getMaxActive());
+//		System.out.println("初始化连接数：" + druidDataSource.getInitialSize());
 	}
 
 }
